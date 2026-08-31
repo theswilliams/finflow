@@ -22,7 +22,12 @@ export function SpendingOverview() {
     const total = monthTxns.reduce((s, t) => s + t.amount, 0);
 
     if (grain === "daily") {
-      const pts: SpendingPoint[] = dailySpend(data.transactions, month).map((d) => ({ label: d.date, value: d.spent }));
+      // cumulative running total for the month — a single large payment (rent) no
+      // longer flattens every other day, and it answers "where am I for the month?"
+      const pts: SpendingPoint[] = dailySpend(data.transactions, month).map((d) => ({
+        label: d.date,
+        value: d.cumulative,
+      }));
       return { points: pts, total };
     }
     if (grain === "weekly") {
@@ -59,7 +64,7 @@ export function SpendingOverview() {
           <p className="mt-1 text-[13px] text-muted-foreground">
             <Money cents={total} showCents={false} className="font-medium text-foreground" /> this month
             {grain === "daily" && (
-              <> · {formatMoney(avgPerDay, "CAD", { showCents: false })}/day avg</>
+              <> · running total · {formatMoney(avgPerDay, "CAD", { showCents: false })}/day avg</>
             )}
           </p>
         </div>

@@ -5,7 +5,7 @@ import { formatMoney } from "@/lib/finance/money";
 import { monthLabel } from "@/lib/finance/dates";
 import { categoryColor, categoryName } from "@/lib/categories";
 import type { CategoryId } from "@/lib/types";
-import { ChartFrame, MoneyTooltip, axisTickStyle, CHART_GRID, CHART_NEUTRAL } from "./chart-kit";
+import { ChartFrame, MoneyTooltip, axisTickStyle, CHART_GRID, CHART_NEUTRAL, useChartAnimation } from "./chart-kit";
 
 export function MonthlyBars({
   data,
@@ -16,6 +16,7 @@ export function MonthlyBars({
   height?: number;
   description?: string;
 }) {
+  const anim = useChartAnimation();
   return (
     <ChartFrame height={height} description={description}>
       <ResponsiveContainer width="100%" height="100%">
@@ -24,7 +25,7 @@ export function MonthlyBars({
           <XAxis dataKey="month" tick={axisTickStyle} tickLine={false} axisLine={false} tickFormatter={(v: string) => monthLabel(v, { month: "short" })} />
           <YAxis tick={axisTickStyle} tickLine={false} axisLine={false} width={56} tickFormatter={(v: number) => formatMoney(v, "CAD", { showCents: false, compact: true })} />
           <Tooltip cursor={{ fill: "var(--color-surface-muted)" }} content={<MoneyTooltip labelFormatter={(v) => monthLabel(String(v))} />} />
-          <Bar dataKey="value" name="Spending" fill={CHART_NEUTRAL} radius={[4, 4, 0, 0]} maxBarSize={44} isAnimationActive animationDuration={500} />
+          <Bar dataKey="value" name="Spending" fill={CHART_NEUTRAL} radius={[4, 4, 0, 0]} maxBarSize={44} {...anim} />
         </BarChart>
       </ResponsiveContainer>
     </ChartFrame>
@@ -40,6 +41,7 @@ export function CategoryTrendLines({
   categories: CategoryId[];
   height?: number;
 }) {
+  const anim = useChartAnimation();
   return (
     <ChartFrame height={height} description={`Line chart of monthly spending for ${categories.map(categoryName).join(", ")}.`}>
       <ResponsiveContainer width="100%" height="100%">
@@ -58,8 +60,7 @@ export function CategoryTrendLines({
               strokeWidth={2}
               dot={false}
               activeDot={{ r: 4, strokeWidth: 0 }}
-              isAnimationActive
-              animationDuration={500}
+              {...anim}
             />
           ))}
         </LineChart>

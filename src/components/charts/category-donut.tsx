@@ -4,7 +4,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { formatMoney } from "@/lib/finance/money";
 import { categoryColor, categoryName } from "@/lib/categories";
 import type { CategoryId } from "@/lib/types";
-import { ChartFrame } from "./chart-kit";
+import { ChartFrame, useChartAnimation } from "./chart-kit";
 
 export interface DonutSlice {
   categoryId: CategoryId;
@@ -24,6 +24,7 @@ export function CategoryDonut({
   onSlice?: (id: CategoryId) => void;
   activeCategory?: CategoryId | null;
 }) {
+  const anim = useChartAnimation();
   const desc = `Donut chart of spending by category. Total ${formatMoney(total)}. ${data
     .map((d) => `${categoryName(d.categoryId)} ${formatMoney(d.amount)}`)
     .join(", ")}.`;
@@ -59,8 +60,7 @@ export function CategoryDonut({
               paddingAngle={1.5}
               stroke="var(--color-surface)"
               strokeWidth={2}
-              isAnimationActive
-              animationDuration={600}
+              {...anim}
               onClick={(d) => onSlice?.((d as unknown as DonutSlice).categoryId)}
             >
               {data.map((d) => (

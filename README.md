@@ -6,6 +6,15 @@ product rather than a CRUD dashboard.
 
 Canadian merchants, CAD currency, dark mode from the start.
 
+## Screenshots
+
+| | |
+| --- | --- |
+| ![Dashboard](docs/dashboard.png) | ![Dashboard — dark](docs/dashboard-dark.png) |
+| **Dashboard** — net cash flow, account balances, running-total spend, budgets | **Dark mode** — same view, viewer's theme |
+| ![Transactions](docs/transactions.png) | ![Insights](docs/insights.png) |
+| **Transactions** — search, filters, inline re-categorization, review flags | **Insights** — trends, category lines, top merchants, recurring detection |
+
 ## Stack
 
 - **Next.js 16** (App Router) + **React 19** + **TypeScript**

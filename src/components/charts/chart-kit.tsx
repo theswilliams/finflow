@@ -4,6 +4,24 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { formatMoney } from "@/lib/finance/money";
 
+/** true when the viewer asked for reduced motion — charts then render without animation */
+export function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = React.useState(false);
+  React.useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const on = () => setReduced(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  return reduced;
+}
+
+export function useChartAnimation(): { isAnimationActive: boolean; animationDuration: number } {
+  const reduced = usePrefersReducedMotion();
+  return { isAnimationActive: !reduced, animationDuration: reduced ? 0 : 550 };
+}
+
 export const CHART_GRID = "var(--color-border)";
 export const CHART_AXIS = "var(--color-muted-foreground)";
 export const CHART_NEUTRAL = "var(--color-info)";
