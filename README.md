@@ -39,6 +39,14 @@ clearly labelled and can be reset or cleared from **Settings → Your data**.
 
 `npm run build` produces a clean production build; `npm run lint` is clean.
 
+## Deployment
+
+Hosted on Vercel: <https://finflow-cyan-theta.vercel.app>. The GitHub repo is
+connected, so pushes to `master` deploy to production and other branches / PRs get
+preview URLs. With no Supabase env vars set the deployment runs in local mode
+(per-browser demo data); add the two `NEXT_PUBLIC_SUPABASE_*` vars in the Vercel
+project settings to turn on auth + persistence.
+
 ## Data layer
 
 The domain model and all financial logic live in `src/lib` and are completely
