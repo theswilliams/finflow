@@ -5,7 +5,7 @@ import { Plus, Target, Pencil, Trash2, PartyPopper } from "lucide-react";
 import { toast } from "sonner";
 import { useStore } from "@/lib/store";
 import { toCents } from "@/lib/finance/money";
-import { formatDate } from "@/lib/finance/dates";
+import { formatDate, now } from "@/lib/finance/dates";
 import type { Goal } from "@/lib/types";
 import { PageHeader, EmptyState, Money } from "@/components/shared";
 import { Button } from "@/components/ui/button";
@@ -24,9 +24,9 @@ const ACCENTS = ["--positive", "--cat-travel", "--cat-transportation", "--cat-ho
 
 function monthsUntil(iso?: string): number | null {
   if (!iso) return null;
-  const now = new Date();
+  const ref = now();
   const target = new Date(iso);
-  return Math.max(0, (target.getFullYear() - now.getFullYear()) * 12 + target.getMonth() - now.getMonth());
+  return Math.max(0, (target.getFullYear() - ref.getFullYear()) * 12 + target.getMonth() - ref.getMonth());
 }
 
 export function GoalsView() {

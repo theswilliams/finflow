@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useStore } from "@/lib/store";
 import { toCents } from "@/lib/finance/money";
-import { isoDate } from "@/lib/finance/dates";
+import { todayIso } from "@/lib/finance/dates";
 import { CATEGORIES, EXPENSE_CATEGORIES } from "@/lib/categories";
 import { transactionFormSchema, type TransactionFormValues } from "@/lib/validation";
 import type { CategoryId, Transaction } from "@/lib/types";
@@ -90,7 +90,7 @@ export function TransactionForm({
           type: "expense",
           amount: "",
           merchant: "",
-          date: isoDate(new Date()),
+          date: todayIso(),
           accountId: accounts[0]?.id ?? "",
           categoryId: undefined,
           description: "",

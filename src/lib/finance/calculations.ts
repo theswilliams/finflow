@@ -1,5 +1,5 @@
 import type { Account, Budget, CategoryId, Transaction } from "../types";
-import { monthKey, monthRange, daysInMonth, isoDate } from "./dates";
+import { monthKey, monthRange, daysInMonth, isoDate, now } from "./dates";
 
 export interface PeriodSummary {
   income: number;
@@ -102,7 +102,7 @@ export function dailySpend(txns: Transaction[], monthK: string): DailySpendPoint
     if (t.type !== "expense" || monthKey(t.date) !== monthK) continue;
     byDay.set(t.date, (byDay.get(t.date) ?? 0) + t.amount);
   }
-  const today = isoDate(new Date());
+  const today = isoDate(now());
   const points: DailySpendPoint[] = [];
   let cumulative = 0;
   for (let day = 1; day <= days; day++) {
@@ -136,7 +136,7 @@ export function budgetStatus(budget: Budget, txns: Transaction[], monthK: string
     .filter((t) => t.type === "expense" && t.categoryId === budget.categoryId && monthKey(t.date) === monthK)
     .reduce((s, t) => s + t.amount, 0);
   const ratio = budget.limit ? spent / budget.limit : 0;
-  const today = new Date();
+  const today = now();
   const isCurrent = monthK === isoDate(today).slice(0, 7);
   const elapsed = isCurrent ? today.getDate() / daysInMonth(monthK) : 1;
   const projected = isCurrent && elapsed > 0 ? Math.round(spent / elapsed) : spent;

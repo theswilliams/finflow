@@ -5,7 +5,7 @@ import { Plus, Wallet, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useStore } from "@/lib/store";
 import { budgetStatus } from "@/lib/finance/calculations";
-import { currentMonthKey, monthLabel, daysInMonth } from "@/lib/finance/dates";
+import { currentMonthKey, monthLabel, daysInMonth, now } from "@/lib/finance/dates";
 import { CATEGORIES, EXPENSE_CATEGORIES, categoryName } from "@/lib/categories";
 import { toCents } from "@/lib/finance/money";
 import type { CategoryId } from "@/lib/types";
@@ -43,7 +43,7 @@ export function BudgetsView() {
     return { budget, spent, projected, remaining: budget - spent };
   }, [statuses]);
 
-  const dayOfMonth = new Date().getDate();
+  const dayOfMonth = now().getDate();
   const totalDays = daysInMonth(month);
   const unbudgeted = EXPENSE_CATEGORIES.filter((c) => !data.budgets.some((b) => b.categoryId === c.id));
 

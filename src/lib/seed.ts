@@ -98,7 +98,13 @@ const RECURRING_BILLS: Sub[] = [
 ];
 
 export function buildDemoData(): FinanceData {
-  const now = new Date();
+  // Anchor the sample data to the last day of the previous calendar month, so the
+  // dashboard always shows one full, complete month (rather than a stub when the
+  // real date is early in a month). The store points its reference clock here.
+  const real = new Date();
+  const now = new Date(real.getFullYear(), real.getMonth(), 0); // day 0 = last day of prev month
+  const referenceDate = isoDate(now);
+
   const chequing: Account = mkAccount("Everyday Chequing", "chequing", "TD Canada Trust", cents(4200));
   const savings: Account = mkAccount("High-Interest Savings", "savings", "EQ Bank", cents(18450));
   const credit: Account = mkAccount("Cashback Visa", "credit_card", "Scotiabank", cents(-1240));
@@ -227,21 +233,22 @@ export function buildDemoData(): FinanceData {
     mkBudget("health", 9000),
   ];
 
+  const plusMonths = (n: number): string => {
+    const d = new Date(now);
+    d.setMonth(d.getMonth() + n);
+    return isoDate(d);
+  };
+
   const goals: Goal[] = [
     mkGoal("Emergency Fund", cents(15000), cents(9200), plusMonths(5), "--positive"),
-    mkGoal("Japan Trip 2027", cents(8000), cents(2650), plusMonths(11), "--cat-travel"),
+    mkGoal("Japan Trip", cents(8000), cents(2650), plusMonths(11), "--cat-travel"),
     mkGoal("New Car Down Payment", cents(12000), cents(4100), plusMonths(14), "--cat-transportation"),
     mkGoal("Home Down Payment", cents(60000), cents(21800), plusMonths(30), "--cat-housing"),
   ];
 
-  return { version: 1, accounts, transactions: txns, budgets, goals, rules, seededDemo: true };
+  return { version: 1, accounts, transactions: txns, budgets, goals, rules, seededDemo: true, referenceDate };
 }
 
-function plusMonths(n: number): string {
-  const d = new Date();
-  d.setMonth(d.getMonth() + n);
-  return isoDate(d);
-}
 
 function mkAccount(name: string, type: Account["type"], institution: string | undefined, openingBalance: number): Account {
   const ts = new Date().toISOString();

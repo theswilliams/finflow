@@ -121,4 +121,6 @@ export interface FinanceData {
   rules: CategorizationRule[];
   seededDemo: boolean;
   seedVersion?: number;
+  /** demo datasets pin the app's "today" here so every screen shows a full month */
+  referenceDate?: string;
 }

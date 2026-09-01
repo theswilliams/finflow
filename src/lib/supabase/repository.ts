@@ -172,7 +172,7 @@ export interface Repo {
   deleteRule: (id: string) => Promise<void>;
   replaceAll: (data: FinanceData) => Promise<void>;
   clearAll: () => Promise<void>;
-  markDemoSeeded: (seeded: boolean) => Promise<void>;
+  markDemoSeeded: (seeded: boolean, referenceDate?: string | null) => Promise<void>;
 }
 
 function chunk<T>(arr: T[], size: number): T[][] {
@@ -209,7 +209,11 @@ export function createRepo(supabase: SupabaseClient, userId: string): Repo {
       throwIf(goals.error, "load goals");
       throwIf(rules.error, "load rules");
 
-      const { data: profile } = await supabase.from("profiles").select("demo_seeded").eq("id", userId).maybeSingle();
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("demo_seeded, demo_reference_date")
+        .eq("id", userId)
+        .maybeSingle();
 
       return {
         version: 1,
@@ -219,6 +223,7 @@ export function createRepo(supabase: SupabaseClient, userId: string): Repo {
         goals: (goals.data ?? []).map(rowToGoal),
         rules: (rules.data ?? []).map(rowToRule),
         seededDemo: Boolean(profile?.demo_seeded),
+        referenceDate: profile?.demo_reference_date ?? undefined,
       } satisfies FinanceData;
     },
 
@@ -298,7 +303,7 @@ export function createRepo(supabase: SupabaseClient, userId: string): Repo {
           .upsert(data.rules.map((r) => ruleToRow(r, userId)));
         throwIf(error, "restore rules");
       }
-      await this.markDemoSeeded(data.seededDemo);
+      await this.markDemoSeeded(data.seededDemo, data.referenceDate ?? null);
     },
 
     async clearAll() {
@@ -307,10 +312,14 @@ export function createRepo(supabase: SupabaseClient, userId: string): Repo {
       await supabase.from("budgets").delete().eq("user_id", userId);
       await supabase.from("goals").delete().eq("user_id", userId);
       await supabase.from("accounts").delete().eq("user_id", userId);
+      await this.markDemoSeeded(false, null);
     },
 
-    async markDemoSeeded(seeded) {
-      await supabase.from("profiles").update({ demo_seeded: seeded }).eq("id", userId);
+    async markDemoSeeded(seeded, referenceDate = null) {
+      await supabase
+        .from("profiles")
+        .update({ demo_seeded: seeded, demo_reference_date: referenceDate })
+        .eq("id", userId);
     },
   };
 }

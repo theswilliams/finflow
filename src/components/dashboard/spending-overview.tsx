@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useStore } from "@/lib/store";
 import { dailySpend } from "@/lib/finance/calculations";
-import { currentMonthKey, monthKey } from "@/lib/finance/dates";
+import { currentMonthKey, monthKey, now } from "@/lib/finance/dates";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/primitives";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/controls";
 import { SpendingAreaChart, type SpendingPoint } from "@/components/charts/spending-area";
@@ -54,7 +54,7 @@ export function SpendingOverview() {
     return { points: pts, total: buckets.get(month) ?? 0 };
   }, [data.transactions, grain, month]);
 
-  const avgPerDay = points.length ? total / new Date().getDate() : 0;
+  const avgPerDay = points.length ? total / now().getDate() : 0;
 
   return (
     <Card>

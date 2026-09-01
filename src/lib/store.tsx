@@ -14,6 +14,7 @@ import type {
 import { buildDemoData } from "./seed";
 import { categorize, recategorize } from "./categorization/engine";
 import { computeImportHash } from "./finance/hash";
+import { setReferenceDate } from "./finance/dates";
 import { uid } from "./utils";
 import { createClient, isSupabaseConfigured } from "./supabase/client";
 import { createRepo, type Repo } from "./supabase/repository";
@@ -22,7 +23,7 @@ export { computeImportHash };
 
 const STORAGE_KEY = "finflow.data.v1";
 /** bump when the demo seed generator changes so returning demo users get fresh data */
-const SEED_VERSION = 6;
+const SEED_VERSION = 7;
 
 type Draft<T> = Omit<T, "id" | "createdAt" | "updatedAt">;
 export type StoreMode = "local" | "supabase";
@@ -89,6 +90,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const repoRef = useRef<Repo | null>(null);
   const dataRef = useRef(data);
   dataRef.current = data;
+
+  // keep the app's reference clock in sync with the active dataset (demo data
+  // pins "today" to the end of its showcase month; real accounts use the real clock)
+  setReferenceDate(data.referenceDate ?? null);
 
   // ---------------------------------------------------------------- bootstrap
   useEffect(() => {
