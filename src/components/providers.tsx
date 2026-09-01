@@ -5,11 +5,13 @@ import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/controls";
 import { StoreProvider } from "@/lib/store";
 import { ErrorReporter } from "@/components/error-reporter";
+import { RecoveryRedirect } from "@/components/auth/recovery-redirect";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem disableTransitionOnChange>
       <ErrorReporter />
+      <RecoveryRedirect />
       <StoreProvider>
         <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
         <Toaster
