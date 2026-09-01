@@ -228,15 +228,22 @@ export function createRepo(supabase: SupabaseClient, userId: string): Repo {
     },
 
     async ensureDefaultRules() {
-      const { data } = await supabase.from("categorization_rules").select("id").limit(1);
-      if (data && data.length) {
-        const { data: all } = await supabase.from("categorization_rules").select("*").order("priority", { ascending: false });
-        return (all ?? []).map(rowToRule);
-      }
+      // Starter rules are seeded server-side by the handle_new_user trigger, so
+      // here we only read. The insert path is a fallback for accounts created
+      // before that trigger existed; conflicts are ignored.
+      const { data: all } = await supabase
+        .from("categorization_rules")
+        .select("*")
+        .order("priority", { ascending: false });
+      if (all && all.length) return all.map(rowToRule);
+
       const rules = defaultRules();
-      const { error } = await supabase.from("categorization_rules").insert(rules.map((r) => ruleToRow(r, userId)));
-      throwIf(error, "seed default rules");
-      return rules;
+      await supabase.from("categorization_rules").insert(rules.map((r) => ruleToRow(r, userId)));
+      const { data: seeded } = await supabase
+        .from("categorization_rules")
+        .select("*")
+        .order("priority", { ascending: false });
+      return seeded && seeded.length ? seeded.map(rowToRule) : rules;
     },
 
     async upsertAccount(a) {
@@ -298,10 +305,11 @@ export function createRepo(supabase: SupabaseClient, userId: string): Repo {
         throwIf(error, "restore goals");
       }
       if (data.rules.length) {
+        // clearAll() above removed the trigger-seeded rules; re-insert this set
         const { error } = await supabase
           .from("categorization_rules")
-          .upsert(data.rules.map((r) => ruleToRow(r, userId)));
-        throwIf(error, "restore rules");
+          .insert(data.rules.map((r) => ruleToRow(r, userId)));
+        if (error) console.warn("restore rules:", error.message);
       }
       await this.markDemoSeeded(data.seededDemo, data.referenceDate ?? null);
     },
@@ -311,6 +319,7 @@ export function createRepo(supabase: SupabaseClient, userId: string): Repo {
       await supabase.from("transactions").delete().eq("user_id", userId);
       await supabase.from("budgets").delete().eq("user_id", userId);
       await supabase.from("goals").delete().eq("user_id", userId);
+      await supabase.from("categorization_rules").delete().eq("user_id", userId);
       await supabase.from("accounts").delete().eq("user_id", userId);
       await this.markDemoSeeded(false, null);
     },
