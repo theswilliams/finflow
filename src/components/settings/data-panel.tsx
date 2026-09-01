@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/primitives";
 
 export function DataPanel() {
-  const { data, isDemo, resetDemo, clearAll, exportJson, importJson } = useStore();
+  const { data, isDemo, mode, user, resetDemo, clearAll, exportJson, importJson } = useStore();
   const fileRef = useRef<HTMLInputElement>(null);
+  const synced = mode === "supabase" && !!user;
 
   const download = () => {
     const blob = new Blob([exportJson()], { type: "application/json" });
@@ -27,7 +28,9 @@ export function DataPanel() {
       <CardHeader>
         <CardTitle>Your data</CardTitle>
         <CardDescription>
-          Everything is stored locally in this browser — nothing is sent to a server.{" "}
+          {synced
+            ? `Your data syncs to your account${user?.email ? ` (${user.email})` : ""}.`
+            : "Everything is stored locally in this browser — nothing is sent to a server."}{" "}
           {isDemo ? "You're currently viewing sample data." : null}
         </CardDescription>
       </CardHeader>
