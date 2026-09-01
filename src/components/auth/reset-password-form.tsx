@@ -35,8 +35,30 @@ export function ResetPasswordForm() {
     if (!isSupabaseConfigured) return;
     const supabase = createClient();
     if (!supabase) return;
-    // the /auth/callback route has already exchanged the recovery code for a session
-    supabase.auth.getUser().then(({ data }) => setStatus(data.user ? "ready" : "invalid"));
+
+    // A recovery session arrives one of two ways: already exchanged by
+    // /auth/callback (PKCE email flow), or detected from the URL by the client
+    // here (fires PASSWORD_RECOVERY / SIGNED_IN). Give the client a moment either way.
+    let settled = false;
+    const ready = () => {
+      settled = true;
+      setStatus("ready");
+    };
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      if (session?.user) ready();
+    });
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) ready();
+    });
+    const timer = setTimeout(async () => {
+      if (settled) return;
+      const { data } = await supabase.auth.getUser();
+      setStatus(data.user ? "ready" : "invalid");
+    }, 2000);
+    return () => {
+      clearTimeout(timer);
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   if (!isSupabaseConfigured) return <LocalModeCard />;
