@@ -37,7 +37,35 @@ Open http://localhost:3000. The app seeds ~300 realistic transactions across 6
 months on first load, so every screen is populated immediately. Sample data is
 clearly labelled and can be reset or cleared from **Settings → Your data**.
 
-`npm run build` produces a clean production build; `npm run lint` is clean.
+```bash
+npm test          # Vitest — finance math, categorization, CSV parsing, filters
+npm run lint
+npm run build
+```
+
+All three are clean, and CI (`.github/workflows/ci.yml`) runs them on every push and PR.
+
+## Auth flows
+
+Email + password, with a full recovery path:
+
+- `/login` · `/signup`
+- **`/forgot-password`** → sends a reset link → `/auth/callback` exchanges the code → **`/reset-password`** sets the new password
+- `/auth/sign-out`
+
+New Supabase projects have email confirmation on by default; turn it off in the
+Supabase dashboard (Authentication → Providers → Email) or keep it and users
+confirm via the same callback route.
+
+## Error handling & observability
+
+- `error.tsx` / `global-error.tsx` / `not-found.tsx` — graceful, on-brand fallback UI
+- `src/instrumentation.ts` `onRequestError` — every server-side error
+- `ErrorReporter` — client `unhandledrejection` / `window.onerror`
+- All of it funnels through `captureError()` in `src/lib/observe.ts`, which today
+  emits a structured JSON line Vercel captures in function logs. To send to Sentry:
+  `npx @sentry/wizard@latest -i nextjs`, then add one line at the marked spot in
+  `observe.ts` — every call site already routes through it.
 
 ## Deployment
 

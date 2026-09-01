@@ -1,7 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-const PUBLIC_PATHS = ["/login", "/signup", "/auth", "/_next", "/favicon"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/signup",
+  "/forgot-password",
+  "/reset-password",
+  "/auth",
+  "/_next",
+  "/favicon",
+];
 
 /**
  * Refreshes the Supabase auth session on every request and, when Supabase is

@@ -1,11 +1,19 @@
 import type { CurrencyCode } from "../types";
 
-/** Parse a user-entered amount string ("$1,299.50") into integer cents. */
+/**
+ * Parse a user-entered amount string ("$1,299.50") into integer cents.
+ * Works on the decimal string rather than `parseFloat(x) * 100` so values like
+ * "35.355" don't fall victim to binary-float representation.
+ */
 export function toCents(input: string | number): number {
   if (typeof input === "number") return Math.round(input * 100);
   const cleaned = input.replace(/[^0-9.-]/g, "");
-  if (!cleaned || cleaned === "-" || cleaned === ".") return 0;
-  return Math.round(parseFloat(cleaned) * 100);
+  if (!/\d/.test(cleaned)) return 0;
+  const negative = cleaned.trimStart().startsWith("-");
+  const [intPart = "0", fracPart = ""] = cleaned.replace(/-/g, "").split(".");
+  const frac = (fracPart + "000").slice(0, 3); // three digits, zero-padded
+  const cents = Number(intPart || "0") * 100 + Math.round(Number(frac) / 10);
+  return negative ? -cents : cents;
 }
 
 export function fromCents(cents: number): number {

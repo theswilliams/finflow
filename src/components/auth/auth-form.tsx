@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, Input, Label } from "@/components/ui/primitives";
+import { LocalModeCard } from "./local-mode-card";
 
 const schema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -63,23 +64,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     }
   });
 
-  if (!configured) {
-    return (
-      <Card>
-        <CardContent className="space-y-3 p-6 text-center">
-          <p className="text-[15px] font-semibold text-foreground">Running in local mode</p>
-          <p className="text-[13px] text-muted-foreground">
-            No Supabase project is connected, so sign-in is disabled and your data lives in this
-            browser. Add <code className="rounded bg-surface-muted px-1">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
-            <code className="rounded bg-surface-muted px-1">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to enable accounts.
-          </p>
-          <Button asChild className="w-full">
-            <Link href="/dashboard">Continue to the app</Link>
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
+  if (!configured) return <LocalModeCard />;
 
   if (sentEmail) {
     return (
@@ -126,6 +111,14 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             {mode === "login" ? "Sign in" : "Create account"}
           </Button>
         </form>
+
+        {mode === "login" ? (
+          <p className="mt-3 text-center text-[13px]">
+            <Link href="/forgot-password" className="text-muted-foreground hover:text-foreground hover:underline">
+              Forgot your password?
+            </Link>
+          </p>
+        ) : null}
 
         <p className="mt-4 text-center text-[13px] text-muted-foreground">
           {mode === "login" ? (

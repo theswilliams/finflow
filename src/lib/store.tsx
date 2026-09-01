@@ -15,6 +15,7 @@ import { buildDemoData } from "./seed";
 import { categorize, recategorize } from "./categorization/engine";
 import { computeImportHash } from "./finance/hash";
 import { setReferenceDate } from "./finance/dates";
+import { captureError } from "./observe";
 import { uid } from "./utils";
 import { createClient, isSupabaseConfigured } from "./supabase/client";
 import { createRepo, type Repo } from "./supabase/repository";
@@ -141,7 +142,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         const snapshot = await repo.loadSnapshot();
         setData(snapshot);
       } catch (e) {
-        console.error(e);
+        captureError(e, { where: "store.loadSnapshot" });
         toast.error("Could not load your data. Please refresh.");
       } finally {
         setReady(true);
@@ -179,7 +180,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const repo = repoRef.current;
       if (mode !== "supabase" || !repo) return;
       Promise.resolve(run(repo)).catch((e) => {
-        console.error(e);
+        captureError(e, { where: "store.persist" });
         toast.error("Change could not be saved. It may not persist after a refresh.");
       });
     };

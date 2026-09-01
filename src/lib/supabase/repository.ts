@@ -309,7 +309,10 @@ export function createRepo(supabase: SupabaseClient, userId: string): Repo {
         const { error } = await supabase
           .from("categorization_rules")
           .insert(data.rules.map((r) => ruleToRow(r, userId)));
-        if (error) console.warn("restore rules:", error.message);
+        if (error) {
+          const { captureError } = await import("../observe");
+          captureError(error, { where: "repo.replaceAll.rules", level: "warning" });
+        }
       }
       await this.markDemoSeeded(data.seededDemo, data.referenceDate ?? null);
     },
