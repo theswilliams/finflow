@@ -30,7 +30,8 @@ export function InsightsView() {
   const [range, setRange] = useState<3 | 6 | 12>(6);
   const [pickedCats, setPickedCats] = useState<CategoryId[]>(["groceries", "restaurants", "transportation", "shopping"]);
 
-  const months = useMemo(() => lastMonths(range), [range]);
+  const anchor = currentMonthKey();
+  const months = useMemo(() => lastMonths(range, anchor), [range, anchor]);
   const expenseTxns = useMemo(() => data.transactions.filter((t) => t.type === "expense"), [data.transactions]);
 
   const monthlyTotals = useMemo(() => {
@@ -49,7 +50,7 @@ export function InsightsView() {
   const topCategories = useMemo(() => spendByCategory(rangeTxns), [rangeTxns]);
   const topMerchants = useMemo(() => merchantStats(rangeTxns, 8), [rangeTxns]);
   const recurring = useMemo(() => detectRecurring(data.transactions), [data.transactions]);
-  const anomalies = useMemo(() => detectAnomalies(expenseTxns, currentMonthKey()), [expenseTxns]);
+  const anomalies = useMemo(() => detectAnomalies(expenseTxns, anchor), [expenseTxns, anchor]);
 
   const recurringAnnual = recurring.reduce((s, r) => s + r.estimatedAnnual, 0);
 
