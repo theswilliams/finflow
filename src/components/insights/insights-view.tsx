@@ -91,21 +91,18 @@ export function InsightsView() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {anomalies.map((a) => (
+            {anomalies.slice(0, 2).map((a) => (
               <button
                 key={a.categoryId}
                 onClick={() => router.push(`/transactions?category=${a.categoryId}`)}
-                className="flex w-full items-center gap-3 rounded-lg border border-border bg-warning-soft/40 px-3 py-2.5 text-left text-[13px]"
+                className="flex w-full items-center gap-3 rounded-lg border border-border bg-surface-muted/50 px-3 py-2.5 text-left text-[13px]"
               >
                 <CategoryDot id={a.categoryId} />
-                <span className="flex-1">
-                  Your <strong>{categoryName(a.categoryId)}</strong> spending this month is{" "}
-                  <strong>
-                    {a.pctOver >= 100 ? "more than double" : `about ${Math.round(a.pctOver)}% above`}
-                  </strong>{" "}
-                  your recent monthly average of {formatMoney(a.average, "CAD", { showCents: false })}.
+                <span className="flex-1 text-muted-foreground">
+                  <strong className="font-medium text-foreground">{categoryName(a.categoryId)}</strong> is running higher
+                  this month than your recent average of {formatMoney(a.average, "CAD", { showCents: false })}/mo.
                 </span>
-                <Money cents={a.currentMonth} showCents={false} className="font-semibold" />
+                <Money cents={a.currentMonth} showCents={false} className="font-semibold text-foreground" />
               </button>
             ))}
             <p className="px-1 pt-1 text-[11px] text-muted-foreground">

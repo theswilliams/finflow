@@ -24,7 +24,7 @@ export { computeImportHash };
 
 const STORAGE_KEY = "finflow.data.v1";
 /** bump when the demo seed generator changes so returning demo users get fresh data */
-const SEED_VERSION = 7;
+const SEED_VERSION = 8;
 
 type Draft<T> = Omit<T, "id" | "createdAt" | "updatedAt">;
 export type StoreMode = "local" | "supabase";
@@ -34,6 +34,8 @@ interface StoreValue {
   ready: boolean;
   isDemo: boolean;
   mode: StoreMode;
+  /** true when browsing the seeded demo without an account (Supabase is configured but skipped) */
+  isGuest: boolean;
   user: User | null;
   signOut: () => Promise<void>;
   // accounts
@@ -80,8 +82,17 @@ function emptyData(): FinanceData {
   return { version: 1, accounts: [], transactions: [], budgets: [], goals: [], rules: [], seededDemo: false };
 }
 
-export function StoreProvider({ children }: { children: React.ReactNode }) {
-  const mode: StoreMode = isSupabaseConfigured ? "supabase" : "local";
+export function StoreProvider({
+  children,
+  initialGuest = false,
+}: {
+  children: React.ReactNode;
+  initialGuest?: boolean;
+}) {
+  // Guest status is read from the cookie on the server and passed in, so the
+  // first client render matches the SSR output.
+  const isGuest = isSupabaseConfigured && initialGuest;
+  const mode: StoreMode = isSupabaseConfigured && !isGuest ? "supabase" : "local";
 
   const [data, setData] = useState<FinanceData>(emptyData);
   const [ready, setReady] = useState(false);
@@ -186,6 +197,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     };
 
     const signOut = async () => {
+      if (isGuest) {
+        if (typeof window !== "undefined") window.location.assign("/exit-demo");
+        return;
+      }
       const supabase = createClient();
       await supabase?.auth.signOut();
       repoRef.current = null;
@@ -198,6 +213,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       data,
       ready,
       mode,
+      isGuest,
       user,
       signOut,
       isDemo: data.seededDemo && data.transactions.some((t) => t.isDemo),
@@ -401,7 +417,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       },
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, ready, mode, user]);
+  }, [data, ready, mode, isGuest, user]);
 
   return <StoreContext.Provider value={api}>{children}</StoreContext.Provider>;
 }

@@ -36,13 +36,21 @@ describe("detectRecurring", () => {
 describe("detectAnomalies", () => {
   it("flags a category well above its trailing average, conservatively", () => {
     const prior = ["2026-03", "2026-04", "2026-05"].flatMap((m) => [
-      txn({ type: "expense", categoryId: "shopping", amount: 10000, date: `${m}-10` }),
+      txn({ type: "expense", categoryId: "shopping", amount: 20000, date: `${m}-10` }),
     ]);
-    const current = [txn({ type: "expense", categoryId: "shopping", amount: 25000, date: "2026-06-10" })];
+    const current = [txn({ type: "expense", categoryId: "shopping", amount: 50000, date: "2026-06-10" })];
     const anomalies = detectAnomalies([...prior, ...current], "2026-06");
     expect(anomalies).toHaveLength(1);
     expect(anomalies[0].categoryId).toBe("shopping");
     expect(Math.round(anomalies[0].pctOver)).toBe(150);
+  });
+  it("needs both a proportional and a material gap", () => {
+    // $130/mo average, current $180 — 38% over but only $50 more: not flagged
+    const prior = ["2026-03", "2026-04", "2026-05"].map((m) =>
+      txn({ type: "expense", categoryId: "restaurants", amount: 13000, date: `${m}-10` }),
+    );
+    const current = [txn({ type: "expense", categoryId: "restaurants", amount: 18000, date: "2026-06-10" })];
+    expect(detectAnomalies([...prior, ...current], "2026-06")).toHaveLength(0);
   });
   it("does not flag small categories or normal variation", () => {
     const prior = ["2026-03", "2026-04", "2026-05"].map((m) =>

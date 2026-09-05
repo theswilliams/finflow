@@ -7,12 +7,18 @@ import { StoreProvider } from "@/lib/store";
 import { ErrorReporter } from "@/components/error-reporter";
 import { RecoveryRedirect } from "@/components/auth/recovery-redirect";
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({
+  children,
+  initialGuest = false,
+}: {
+  children: React.ReactNode;
+  initialGuest?: boolean;
+}) {
   return (
     <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem disableTransitionOnChange>
       <ErrorReporter />
       <RecoveryRedirect />
-      <StoreProvider>
+      <StoreProvider initialGuest={initialGuest}>
         <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
         <Toaster
           position="bottom-right"

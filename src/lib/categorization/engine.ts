@@ -38,11 +38,14 @@ export const DEFAULT_MERCHANT_RULES: { match: string; category: CategoryId }[] =
   { match: "shell", category: "transportation" },
   { match: "petro-canada", category: "transportation" },
   { match: "petro canada", category: "transportation" },
+  { match: "circle k", category: "transportation" },
+  { match: "husky", category: "transportation" },
+  { match: "pioneer", category: "transportation" },
+  { match: "ultramar", category: "transportation" },
   { match: "ttc", category: "transportation" },
   { match: "presto", category: "transportation" },
   { match: "go transit", category: "transportation" },
   { match: "parking", category: "transportation" },
-  { match: "gas", category: "transportation" },
   // Subscriptions
   { match: "netflix", category: "subscriptions" },
   { match: "spotify", category: "subscriptions" },
@@ -100,7 +103,9 @@ export const DEFAULT_MERCHANT_RULES: { match: string; category: CategoryId }[] =
   { match: "rent", category: "housing" },
   { match: "mortgage", category: "housing" },
   { match: "property management", category: "housing" },
+  { match: "property mgmt", category: "housing" },
   { match: "condo fee", category: "housing" },
+  { match: "landlord", category: "housing" },
   // Travel
   { match: "air canada", category: "travel" },
   { match: "westjet", category: "travel" },
@@ -125,6 +130,12 @@ export interface CategorizationResult {
 
 function normalize(s: string): string {
   return s.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+/** whole-token match: `esso` hits "ESSO CIRCLE K" but not "accessories" */
+function containsToken(haystack: string, token: string): boolean {
+  const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`).test(haystack);
 }
 
 function ruleMatches(rule: CategorizationRule, merchant: string, description: string): boolean {
@@ -161,7 +172,7 @@ export function categorize(
 
   const hay = normalize(`${merchant} ${description}`);
   for (const entry of DEFAULT_MERCHANT_RULES) {
-    if (hay.includes(entry.match)) {
+    if (containsToken(hay, entry.match)) {
       if (input.type === "income" && entry.category !== "income") continue;
       return { categoryId: entry.category, source: "auto", confidence: 0.9 };
     }

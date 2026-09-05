@@ -1,6 +1,7 @@
 "use client";
 
-import { LogOut, User as UserIcon } from "lucide-react";
+import Link from "next/link";
+import { LogOut, UserPlus, Cloud } from "lucide-react";
 import { useStore } from "@/lib/store";
 import {
   DropdownMenu,
@@ -12,15 +13,38 @@ import {
 } from "@/components/ui/controls";
 
 export function AccountMenu() {
-  const { mode, user, signOut } = useStore();
+  const { mode, isGuest, user, signOut } = useStore();
 
-  if (mode !== "supabase" || !user) {
+  // Local-only build (no Supabase configured): nothing to show here.
+  if (mode !== "supabase" && !isGuest) {
+    return <div className="px-4 text-[11px] text-muted-foreground">CAD · All figures in Canadian dollars</div>;
+  }
+
+  if (isGuest) {
     return (
-      <div className="px-4 text-[11px] text-muted-foreground">CAD · All figures in Canadian dollars</div>
+      <div className="mx-3 rounded-lg border border-border bg-surface-muted/60 p-3">
+        <p className="text-[12px] font-medium text-foreground">You&apos;re exploring the demo</p>
+        <p className="mt-0.5 text-[11px] text-muted-foreground">
+          Changes stay in this browser. Create an account to sync and keep them.
+        </p>
+        <Link
+          href="/exit-demo?to=signup"
+          className="mt-2.5 flex items-center justify-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-[12px] font-medium text-primary-foreground hover:opacity-90"
+        >
+          <UserPlus className="size-3.5" />
+          Create a free account
+        </Link>
+        <Link
+          href="/exit-demo"
+          className="mt-1.5 block text-center text-[11px] text-muted-foreground hover:text-foreground"
+        >
+          Sign in
+        </Link>
+      </div>
     );
   }
 
-  const label = user.email ?? "Account";
+  const label = user?.email ?? "Account";
   const initial = label[0]?.toUpperCase() ?? "?";
 
   return (
@@ -39,7 +63,7 @@ export function AccountMenu() {
           <DropdownMenuLabel>{label}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem disabled>
-            <UserIcon className="size-4" /> Your data syncs to Supabase
+            <Cloud className="size-4" /> Synced to your account
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem destructive onClick={() => void signOut()}>

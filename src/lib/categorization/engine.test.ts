@@ -45,6 +45,15 @@ describe("categorize", () => {
   it("income without a match falls back to the income category", () => {
     expect(categorize({ merchant: "Some Client Payment", type: "income" }, [])).toMatchObject({ categoryId: "income" });
   });
+
+  it("built-in keywords match whole tokens, not substrings", () => {
+    // "esso" must not fire on "acc-esso-ries"
+    expect(categorize({ merchant: "Best Buy", description: "Monitor + accessories", type: "expense" }, []).categoryId).toBe("shopping");
+    // a gas *utility* is not transportation
+    expect(categorize({ merchant: "Enbridge Gas", description: "monthly", type: "expense" }, []).categoryId).toBe("utilities");
+    // real gas stations still work
+    expect(categorize({ merchant: "ESSO CIRCLE K", type: "expense" }, []).categoryId).toBe("transportation");
+  });
 });
 
 describe("recategorize", () => {

@@ -7,9 +7,13 @@ const PUBLIC_PATHS = [
   "/forgot-password",
   "/reset-password",
   "/auth",
+  "/demo",
+  "/exit-demo",
   "/_next",
   "/favicon",
 ];
+
+const GUEST_COOKIE = "finflow-guest";
 
 /**
  * Refreshes the Supabase auth session on every request and, when Supabase is
@@ -46,10 +50,17 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/") || pathname.startsWith(p));
+  const isGuest = request.cookies.get(GUEST_COOKIE)?.value === "1";
 
-  if (!user && !isPublic) {
+  // A signed-in visitor doesn't need the guest cookie hanging around.
+  if (user && isGuest) response.cookies.delete(GUEST_COOKIE);
+
+  // Unauthenticated + not already a guest → drop straight into the demo
+  // rather than a login wall (portfolio-friendly). /login is still reachable.
+  if (!user && !isGuest && !isPublic) {
     const redirect = request.nextUrl.clone();
-    redirect.pathname = "/login";
+    redirect.pathname = "/demo";
+    redirect.search = "";
     redirect.searchParams.set("next", pathname);
     return NextResponse.redirect(redirect);
   }

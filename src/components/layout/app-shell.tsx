@@ -25,8 +25,8 @@ function Logo() {
 }
 
 function DemoBanner() {
-  const { isDemo } = useStore();
-  if (!isDemo) return null;
+  const { isDemo, isGuest } = useStore();
+  if (!isDemo || isGuest) return null; // guests get a richer card from AccountMenu
   return (
     <div className="px-3 pb-2">
       <div className="flex items-center gap-2 rounded-lg border border-border bg-surface-muted px-3 py-2 text-[11px] text-muted-foreground">

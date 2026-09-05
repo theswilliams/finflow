@@ -137,6 +137,12 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             </>
           )}
         </p>
+
+        <div className="mt-5 border-t border-border pt-4">
+          <Button variant="outline" className="w-full" asChild>
+            <Link href="/demo">Explore the demo — no account needed</Link>
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

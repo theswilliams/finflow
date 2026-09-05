@@ -128,11 +128,15 @@ export function detectAnomalies(txns: Transaction[], currentMonthK: string, look
 
   const out: Anomaly[] = [];
   for (const [cat, cur] of current) {
-    const priorTotal = (prior.get(cat) ?? []).reduce((s, a) => s + a, 0);
-    const avg = priorTotal / lookbackMonths;
-    if (avg < 5000) continue; // ignore trivial categories (< $50/mo avg)
+    const priors = prior.get(cat) ?? [];
+    if (priors.length < 2) continue; // not enough history to say anything
+    const avg = priors.reduce((s, a) => s + a, 0) / lookbackMonths;
+    if (avg < 12000) continue; // ignore small categories (< ~$120/mo average)
     const pctOver = ((cur - avg) / avg) * 100;
-    if (pctOver >= 30) out.push({ categoryId: cat, currentMonth: cur, average: Math.round(avg), pctOver });
+    // needs to be both proportionally and materially higher
+    if (pctOver >= 40 && cur - avg >= 10000) {
+      out.push({ categoryId: cat, currentMonth: cur, average: Math.round(avg), pctOver });
+    }
   }
   return out.sort((a, b) => b.pctOver - a.pctOver);
 }
