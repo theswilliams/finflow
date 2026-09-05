@@ -14,7 +14,7 @@ import { PageHeader, EmptyState, Money, CategoryDot } from "@/components/shared"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/primitives";
 import { Progress } from "@/components/ui/controls";
 import { Segmented } from "@/components/ui/segmented";
-import { MonthlyBars, CategoryTrendLines } from "@/components/charts/trend-lines";
+import { MonthlyBars, CategoryTrendLines } from "@/components/charts/lazy";
 import { MerchantAvatar } from "@/components/transactions/merchant-avatar";
 
 const FREQ_LABEL: Record<RecurringFrequency, string> = {

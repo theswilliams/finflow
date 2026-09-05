@@ -6,7 +6,7 @@ import { useStore } from "@/lib/store";
 import { spendByCategory } from "@/lib/finance/calculations";
 import { categoryName } from "@/lib/categories";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/primitives";
-import { CategoryDonut } from "@/components/charts/category-donut";
+import { CategoryDonut } from "@/components/charts/lazy";
 import { Money, CategoryDot } from "@/components/shared";
 import { EmptyState } from "@/components/shared";
 import { PieChart } from "lucide-react";

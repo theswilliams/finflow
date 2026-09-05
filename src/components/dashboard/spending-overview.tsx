@@ -6,7 +6,7 @@ import { dailySpend } from "@/lib/finance/calculations";
 import { monthKey, now, currentMonthKey, daysInMonth } from "@/lib/finance/dates";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/primitives";
 import { Segmented } from "@/components/ui/segmented";
-import { SpendingAreaChart, type SpendingPoint } from "@/components/charts/spending-area";
+import { SpendingAreaChart, type SpendingPoint } from "@/components/charts/lazy";
 import { Money } from "@/components/shared";
 import { formatMoney } from "@/lib/finance/money";
 
