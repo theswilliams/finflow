@@ -3,7 +3,7 @@
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { formatMoney } from "@/lib/finance/money";
 import { formatDate } from "@/lib/finance/dates";
-import { ChartFrame, MoneyTooltip, axisTickStyle, CHART_GRID, CHART_NEUTRAL, useChartAnimation } from "./chart-kit";
+import { ChartFrame, MoneyTooltip, axisTickStyle, moneyTicks, CHART_GRID, CHART_NEUTRAL, useChartAnimation } from "./chart-kit";
 
 export interface SpendingPoint {
   label: string; // x value (iso date or bucket label)
@@ -22,6 +22,7 @@ export function SpendingAreaChart({
   description?: string;
 }) {
   const anim = useChartAnimation();
+  const { domain, ticks } = moneyTicks(data.map((d) => (Number.isFinite(d.value) ? d.value : 0)));
   return (
     <ChartFrame height={height} description={description}>
       <ResponsiveContainer width="100%" height="100%">
@@ -45,7 +46,9 @@ export function SpendingAreaChart({
             tick={axisTickStyle}
             tickLine={false}
             axisLine={false}
-            width={56}
+            width={52}
+            domain={domain}
+            ticks={ticks}
             tickFormatter={(v: number) => formatMoney(v, "CAD", { showCents: false, compact: true })}
           />
           <Tooltip

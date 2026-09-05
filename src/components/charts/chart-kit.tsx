@@ -30,6 +30,19 @@ export const CHART_NEGATIVE = "var(--color-negative)";
 
 export const axisTickStyle = { fill: CHART_AXIS, fontSize: 11 } as const;
 
+/** a clean round ceiling above `v` (e.g. 5523 -> 6000, 238 -> 300) */
+export function niceCeil(v: number): number {
+  if (v <= 0) return 100;
+  const mag = Math.pow(10, Math.floor(Math.log10(v)));
+  return Math.ceil(v / mag) * mag;
+}
+
+/** [0, ¼, ½, ¾, top] — evenly spaced money ticks */
+export function moneyTicks(values: number[]): { domain: [number, number]; ticks: number[] } {
+  const top = niceCeil(Math.max(1, ...values));
+  return { domain: [0, top], ticks: [0, top / 4, top / 2, (top * 3) / 4, top] };
+}
+
 export function ChartFrame({
   children,
   className,

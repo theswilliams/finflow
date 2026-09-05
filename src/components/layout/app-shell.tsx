@@ -25,6 +25,22 @@ function Logo() {
   );
 }
 
+function GuestStrip() {
+  const { isGuest } = useStore();
+  if (!isGuest) return null;
+  return (
+    <div className="flex items-center justify-between gap-3 border-b border-border bg-surface-muted/70 px-4 py-1.5 text-[12px] lg:hidden">
+      <span className="text-muted-foreground">
+        <span className="mr-1.5 inline-block size-1.5 rounded-full bg-warning align-middle" />
+        Viewing the demo
+      </span>
+      <Link href="/exit-demo?to=signup" className="font-medium text-foreground hover:underline">
+        Create an account
+      </Link>
+    </div>
+  );
+}
+
 function DemoBanner() {
   const { isDemo, isGuest } = useStore();
   if (!isDemo || isGuest) return null; // guests get a richer card from AccountMenu
@@ -105,6 +121,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <ThemeToggle />
           </div>
         </header>
+        <GuestStrip />
 
         <main className={cn("mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6", !ready && "opacity-0")}>
           {children}

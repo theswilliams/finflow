@@ -198,7 +198,7 @@ export function buildDemoData(): FinanceData {
 
   // A couple of deliberate anomalies in the most recent month
   const thisMonth = isoDate(new Date(now.getFullYear(), now.getMonth(), Math.min(12, now.getDate())));
-  txns.push(mkTxn({ accountId: credit.id, date: thisMonth, merchant: "Best Buy", description: "Monitor + accessories", amount: cents(529.99), type: "expense" }));
+  txns.push(mkTxn({ accountId: credit.id, date: thisMonth, merchant: "Best Buy", description: "Mechanical keyboard + hub", amount: cents(287.4), type: "expense" }));
   txns.push(mkTxn({ accountId: credit.id, date: isoDate(new Date(now.getFullYear(), now.getMonth(), Math.min(6, now.getDate()))), merchant: "Air Canada", description: "Flights — YYZ to YVR", amount: cents(742.5), type: "expense" }));
 
   // A few genuinely ambiguous ones for the review queue
@@ -226,7 +226,7 @@ export function buildDemoData(): FinanceData {
     mkBudget("groceries", 72000),
     mkBudget("restaurants", 34000),
     mkBudget("transportation", 46000),
-    mkBudget("shopping", 32000),
+    mkBudget("shopping", 38000),
     mkBudget("entertainment", 12000),
     mkBudget("subscriptions", 11000),
     mkBudget("utilities", 42000),

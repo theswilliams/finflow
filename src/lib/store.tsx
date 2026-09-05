@@ -24,7 +24,7 @@ export { computeImportHash };
 
 const STORAGE_KEY = "finflow.data.v1";
 /** bump when the demo seed generator changes so returning demo users get fresh data */
-const SEED_VERSION = 8;
+const SEED_VERSION = 9;
 
 type Draft<T> = Omit<T, "id" | "createdAt" | "updatedAt">;
 export type StoreMode = "local" | "supabase";
