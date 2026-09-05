@@ -45,6 +45,17 @@ export function moneyTicks(values: number[]): { domain: [number, number]; ticks:
   return { domain: [0, top], ticks: [0, top / 4, top / 2, (top * 3) / 4, top] };
 }
 
+/** compact money for axis ticks (input is integer cents) — one decimal so
+ *  150000¢ reads "$1.5K", not "$2K" */
+export function compactMoneyTick(cents: number): string {
+  const dollars = cents / 100;
+  if (dollars >= 1000) {
+    const k = dollars / 1000;
+    return `$${Number.isInteger(k) ? k : k.toFixed(1)}K`;
+  }
+  return `$${Math.round(dollars)}`;
+}
+
 export function ChartFrame({
   children,
   className,

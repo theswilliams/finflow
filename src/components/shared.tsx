@@ -54,7 +54,8 @@ export function TrendPill({
   const flat = Math.abs(rounded) < 0.1;
   const good = flat ? null : invert ? rounded < 0 : rounded > 0;
   const Icon = flat ? Minus : rounded > 0 ? ArrowUpRight : ArrowDownRight;
-  const magnitude = Math.abs(rounded) >= 1000 ? "10×+" : `${Math.abs(rounded) >= 100 ? Math.round(Math.abs(rounded)) : Math.abs(rounded)}%`;
+  const abs = Math.abs(rounded);
+  const magnitude = abs >= 200 ? "200%+" : `${abs >= 100 ? Math.round(abs) : abs}%`;
   return (
     <span
       className={cn(

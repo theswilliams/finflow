@@ -1,11 +1,10 @@
 "use client";
 
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { formatMoney } from "@/lib/finance/money";
 import { monthLabel } from "@/lib/finance/dates";
 import { categoryColor, categoryName } from "@/lib/categories";
 import type { CategoryId } from "@/lib/types";
-import { ChartFrame, MoneyTooltip, axisTickStyle, moneyTicks, CHART_GRID, CHART_NEUTRAL, useChartAnimation } from "./chart-kit";
+import { ChartFrame, MoneyTooltip, axisTickStyle, moneyTicks, compactMoneyTick, CHART_GRID, CHART_NEUTRAL, useChartAnimation } from "./chart-kit";
 
 export function MonthlyBars({
   data,
@@ -24,7 +23,7 @@ export function MonthlyBars({
         <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 4 }}>
           <CartesianGrid stroke={CHART_GRID} strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="month" tick={axisTickStyle} tickLine={false} axisLine={false} tickFormatter={(v: string) => monthLabel(v, { month: "short" })} />
-          <YAxis tick={axisTickStyle} tickLine={false} axisLine={false} width={52} domain={domain} ticks={ticks} tickFormatter={(v: number) => formatMoney(v, "CAD", { showCents: false, compact: true })} />
+          <YAxis tick={axisTickStyle} tickLine={false} axisLine={false} width={52} domain={domain} ticks={ticks} tickFormatter={compactMoneyTick} />
           <Tooltip cursor={{ fill: "var(--color-surface-muted)" }} content={<MoneyTooltip labelFormatter={(v) => monthLabel(String(v))} />} />
           <Bar dataKey="value" name="Spending" fill={CHART_NEUTRAL} radius={[4, 4, 0, 0]} maxBarSize={44} {...anim} />
         </BarChart>
@@ -51,7 +50,7 @@ export function CategoryTrendLines({
         <LineChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 4 }}>
           <CartesianGrid stroke={CHART_GRID} strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="month" tick={axisTickStyle} tickLine={false} axisLine={false} tickFormatter={(v: string) => monthLabel(v, { month: "short" })} />
-          <YAxis tick={axisTickStyle} tickLine={false} axisLine={false} width={52} domain={domain} ticks={ticks} tickFormatter={(v: number) => formatMoney(v, "CAD", { showCents: false, compact: true })} />
+          <YAxis tick={axisTickStyle} tickLine={false} axisLine={false} width={52} domain={domain} ticks={ticks} tickFormatter={compactMoneyTick} />
           <Tooltip content={<MoneyTooltip labelFormatter={(v) => monthLabel(String(v))} hideZero />} />
           {categories.map((c) => (
             <Line
