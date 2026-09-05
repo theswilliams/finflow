@@ -12,6 +12,7 @@ import { SidebarNav, MobileTabBar, NAV_ITEMS } from "./nav";
 import { ThemeToggle } from "./theme-toggle";
 import { AccountMenu } from "./account-menu";
 import { AddTransactionButton } from "@/components/transactions/add-transaction";
+import { SiteFooter } from "@/components/site-footer";
 
 function Logo() {
   return (
@@ -105,8 +106,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className={cn("mx-auto w-full max-w-6xl flex-1 px-4 py-6 pb-24 sm:px-6 lg:pb-10", !ready && "opacity-0")}>
+        <main className={cn("mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6", !ready && "opacity-0")}>
           {children}
+          <SiteFooter className="mt-12 pb-24 lg:pb-8" />
         </main>
       </div>
 

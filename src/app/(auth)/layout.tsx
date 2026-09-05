@@ -1,4 +1,5 @@
 import { Sparkles } from "lucide-react";
+import { SiteFooter } from "@/components/site-footer";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -10,9 +11,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <span className="text-lg font-semibold tracking-tight text-foreground">FinFlow</span>
       </div>
       <div className="w-full max-w-sm">{children}</div>
-      <p className="mt-8 text-center text-[11px] text-muted-foreground">
-        Personal finance, clearly · Amounts in CAD
-      </p>
+      <SiteFooter className="mt-8" />
     </div>
   );
 }
