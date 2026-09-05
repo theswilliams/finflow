@@ -14,12 +14,12 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
   ]),
   {
-    // These newer react-hooks rules flag idiomatic, intentional patterns we rely on
-    // (one-shot mount flags, syncing local UI state from the URL, client-only hydration).
-    // Keep them visible as warnings rather than failing the build.
+    // A handful of deliberate patterns trip the newest react-hooks rules:
+    // one-shot mount flags, the client-only store bootstrap that hydrates from
+    // localStorage / Supabase, and syncing the transaction filter from the URL.
+    // Surfaced as warnings, not build failures.
     rules: {
       "react-hooks/set-state-in-effect": "warn",
-      "react-hooks/refs": "warn",
     },
   },
 ]);

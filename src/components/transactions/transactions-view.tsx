@@ -80,7 +80,6 @@ export function TransactionsView() {
       tag: tag ?? undefined,
       reviewed: review === "1" ? "unreviewed" : undefined,
     }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
 
   const filtered = useMemo(() => {
@@ -114,7 +113,8 @@ export function TransactionsView() {
   const toggleOne = (id: string) =>
     setSelected((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   const clearSelection = () => setSelected(new Set());

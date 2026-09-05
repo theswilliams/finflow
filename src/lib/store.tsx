@@ -105,8 +105,6 @@ export function StoreProvider({
 
   const bootstrapped = useRef(false);
   const repoRef = useRef<Repo | null>(null);
-  const dataRef = useRef(data);
-  dataRef.current = data;
 
   // keep the app's reference clock in sync with the active dataset (demo data
   // pins "today" to the end of its showcase month; real accounts use the real clock)
@@ -213,16 +211,15 @@ export function StoreProvider({
     };
 
     const signOut = async () => {
+      // A hard navigation is intentional here: it drops every bit of client
+      // state and forces the server to re-read cookies (guest / session).
       if (isGuest) {
-        if (typeof window !== "undefined") window.location.assign("/exit-demo");
+        window.location.href = "/exit-demo"; // eslint-disable-line @next/next/no-location-assign-relative-destination
         return;
       }
       const supabase = createClient();
       await supabase?.auth.signOut();
-      repoRef.current = null;
-      setUser(null);
-      setData(emptyData());
-      if (typeof window !== "undefined") window.location.assign("/login");
+      window.location.href = "/login"; // eslint-disable-line @next/next/no-location-assign-relative-destination
     };
 
     return {
@@ -244,7 +241,7 @@ export function StoreProvider({
         return acc;
       },
       updateAccount(id, patch) {
-        const current = dataRef.current.accounts.find((a) => a.id === id);
+        const current = data.accounts.find((a) => a.id === id);
         if (!current) return;
         const next = { ...current, ...patch, updatedAt: nowIso() };
         mutate((s) => ({ ...s, accounts: s.accounts.map((a) => (a.id === id ? next : a)) }));
@@ -262,7 +259,7 @@ export function StoreProvider({
       addTransaction(input) {
         const res = input.categoryId
           ? { categoryId: input.categoryId, source: "manual" as const, confidence: 1 }
-          : categorize({ merchant: input.merchant, description: input.description, type: input.type }, dataRef.current.rules);
+          : categorize({ merchant: input.merchant, description: input.description, type: input.type }, data.rules);
         const t: Transaction = {
           id: uid("txn"),
           accountId: input.accountId,
@@ -290,7 +287,7 @@ export function StoreProvider({
 
       addTransactionsBulk(rows) {
         const existing = new Set(
-          dataRef.current.transactions.map((t) => t.importHash ?? computeImportHash(t)),
+          data.transactions.map((t) => t.importHash ?? computeImportHash(t)),
         );
         const fresh: Transaction[] = [];
         let duplicates = 0;
@@ -311,7 +308,7 @@ export function StoreProvider({
       },
 
       updateTransaction(id, patch) {
-        const current = dataRef.current.transactions.find((t) => t.id === id);
+        const current = data.transactions.find((t) => t.id === id);
         if (!current) return;
         const next = { ...current, ...patch, updatedAt: nowIso() };
         mutate((s) => ({ ...s, transactions: s.transactions.map((t) => (t.id === id ? next : t)) }));
@@ -319,7 +316,7 @@ export function StoreProvider({
       },
       updateTransactionsBulk(ids, patch) {
         const set = new Set(ids);
-        const updated = dataRef.current.transactions
+        const updated = data.transactions
           .filter((t) => set.has(t.id))
           .map((t) => ({ ...t, ...patch, updatedAt: nowIso() }));
         mutate((s) => ({
@@ -334,7 +331,7 @@ export function StoreProvider({
         persist((r) => r.deleteTransactions(ids));
       },
       setCategory(id, categoryId, source = "manual") {
-        const current = dataRef.current.transactions.find((t) => t.id === id);
+        const current = data.transactions.find((t) => t.id === id);
         if (!current) return;
         const next = { ...current, categoryId, categorySource: source, reviewed: true, updatedAt: nowIso() };
         mutate((s) => ({ ...s, transactions: s.transactions.map((t) => (t.id === id ? next : t)) }));
@@ -342,7 +339,7 @@ export function StoreProvider({
       },
 
       upsertBudget(categoryId, limit) {
-        const existing = dataRef.current.budgets.find((b) => b.categoryId === categoryId);
+        const existing = data.budgets.find((b) => b.categoryId === categoryId);
         const budget: Budget = existing
           ? { ...existing, limit, updatedAt: nowIso() }
           : { id: uid("bgt"), categoryId, limit, createdAt: nowIso(), updatedAt: nowIso() };
@@ -364,7 +361,7 @@ export function StoreProvider({
         return g;
       },
       updateGoal(id, patch) {
-        const current = dataRef.current.goals.find((g) => g.id === id);
+        const current = data.goals.find((g) => g.id === id);
         if (!current) return;
         const next = { ...current, ...patch, updatedAt: nowIso() };
         mutate((s) => ({ ...s, goals: s.goals.map((g) => (g.id === id ? next : g)) }));
@@ -386,8 +383,8 @@ export function StoreProvider({
           id: uid("rule"),
           createdAt: nowIso(),
         };
-        const prev = dataRef.current.transactions;
-        const rules = [...dataRef.current.rules, rule];
+        const prev = data.transactions;
+        const rules = [...data.rules, rule];
         const nextTxns = recategorize(prev, rules);
         const changed = nextTxns.filter((t, i) => t !== prev[i]);
         mutate((s) => ({ ...s, rules, transactions: nextTxns }));
@@ -396,8 +393,8 @@ export function StoreProvider({
         return rule;
       },
       updateRule(id, patch) {
-        const prev = dataRef.current.transactions;
-        const rules = dataRef.current.rules.map((r) => (r.id === id ? { ...r, ...patch } : r));
+        const prev = data.transactions;
+        const rules = data.rules.map((r) => (r.id === id ? { ...r, ...patch } : r));
         const updated = rules.find((r) => r.id === id);
         const nextTxns = recategorize(prev, rules);
         const changed = nextTxns.filter((t, i) => t !== prev[i]);
@@ -410,8 +407,8 @@ export function StoreProvider({
         persist((r) => r.deleteRule(id));
       },
       applyRules() {
-        const prev = dataRef.current.transactions;
-        const nextTxns = recategorize(prev, dataRef.current.rules);
+        const prev = data.transactions;
+        const nextTxns = recategorize(prev, data.rules);
         const changed = nextTxns.filter((t, i) => t !== prev[i]);
         mutate((s) => ({ ...s, transactions: nextTxns }));
         if (changed.length) persist((r) => r.upsertTransactions(changed));
@@ -432,10 +429,9 @@ export function StoreProvider({
         persist((r) => r.replaceAll(parsed));
       },
       exportJson() {
-        return JSON.stringify(dataRef.current, null, 2);
+        return JSON.stringify(data, null, 2);
       },
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, ready, mode, isGuest, user, viewMonth, earliestMonth]);
 
   return <StoreContext.Provider value={api}>{children}</StoreContext.Provider>;

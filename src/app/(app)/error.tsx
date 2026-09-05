@@ -27,8 +27,9 @@ export default function AppError({ error, reset }: { error: Error & { digest?: s
               <RefreshCw className="size-4" />
               Try again
             </Button>
-            <Button variant="outline" onClick={() => (window.location.href = "/dashboard")}>
-              Go to dashboard
+            <Button variant="outline" asChild>
+              {/* full navigation on purpose — leaves the errored render tree behind */}
+              <a href="/dashboard">Go to dashboard</a>
             </Button>
           </div>
           {error.digest ? (
