@@ -139,6 +139,13 @@
 html {
   color-scheme: light dark;
 }
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="dark"],
+.dark {
+  color-scheme: dark;
+}
 
 body {
   background-color: var(--color-background);

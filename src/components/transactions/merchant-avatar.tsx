@@ -27,8 +27,8 @@ export function MerchantAvatar({ name, className }: { name: string; className?: 
         className,
       )}
       style={{
-        backgroundColor: `color-mix(in oklch, oklch(0.7 0.1 ${h}) 18%, var(--color-surface))`,
-        color: `oklch(0.62 0.1 ${h})`,
+        backgroundColor: `color-mix(in oklch, oklch(0.7 0.1 ${h}) 15%, var(--color-surface))`,
+        color: `light-dark(oklch(0.4 0.11 ${h}), oklch(0.78 0.1 ${h}))`,
       }}
     >
       {initials}

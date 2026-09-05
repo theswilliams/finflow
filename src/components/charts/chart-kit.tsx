@@ -19,7 +19,9 @@ export function usePrefersReducedMotion(): boolean {
 
 export function useChartAnimation(): { isAnimationActive: boolean; animationDuration: number } {
   const reduced = usePrefersReducedMotion();
-  return { isAnimationActive: !reduced, animationDuration: reduced ? 0 : 550 };
+  // a short enter animation on desktop; none for reduced-motion. Kept brief so it
+  // doesn't pile onto the main thread right after hydration.
+  return { isAnimationActive: !reduced, animationDuration: reduced ? 0 : 300 };
 }
 
 export const CHART_GRID = "var(--color-border)";

@@ -8,9 +8,9 @@ import { Money, CategoryDot } from "@/components/shared";
 import { AlertTriangle, CheckCircle2, CircleDot } from "lucide-react";
 
 const STATE_META = {
-  healthy: { label: "On track", tone: "text-muted-foreground", bar: "bg-positive", icon: CheckCircle2 },
-  warning: { label: "Near limit", tone: "text-warning", bar: "bg-warning", icon: CircleDot },
-  over: { label: "Over budget", tone: "text-negative", bar: "bg-negative", icon: AlertTriangle },
+  healthy: { label: "On track", icon: "text-positive", bar: "bg-positive", Icon: CheckCircle2 },
+  warning: { label: "Near limit", icon: "text-warning", bar: "bg-warning", Icon: CircleDot },
+  over: { label: "Over budget", icon: "text-negative", bar: "bg-negative", Icon: AlertTriangle },
 } as const;
 
 export function BudgetBar({
@@ -23,7 +23,7 @@ export function BudgetBar({
   compact?: boolean;
 }) {
   const meta = STATE_META[status.state];
-  const Icon = meta.icon;
+  const Icon = meta.Icon;
   const pct = Math.round(status.ratio * 100);
 
   const body = (
@@ -46,8 +46,8 @@ export function BudgetBar({
         indicatorClassName={meta.bar}
       />
       {!compact ? (
-        <div className={cn("mt-1.5 flex items-center gap-1 text-[11px]", meta.tone)}>
-          <Icon className="size-3" />
+        <div className="mt-1.5 flex items-center gap-1 text-[11px] text-muted-foreground">
+          <Icon className={cn("size-3", meta.icon)} />
           <span>
             {meta.label} · {pct}% used ·{" "}
             {status.remaining >= 0 ? (
