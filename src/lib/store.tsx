@@ -14,7 +14,7 @@ import type {
 import { buildDemoData } from "./seed";
 import { categorize, recategorize } from "./categorization/engine";
 import { computeImportHash } from "./finance/hash";
-import { setReferenceDate } from "./finance/dates";
+import { setReferenceDate, currentMonthKey } from "./finance/dates";
 import { captureError } from "./observe";
 import { uid } from "./utils";
 import { createClient, isSupabaseConfigured } from "./supabase/client";
@@ -66,6 +66,10 @@ interface StoreValue {
   updateRule: (id: string, patch: Partial<CategorizationRule>) => void;
   removeRule: (id: string) => void;
   applyRules: () => void;
+  // month navigation (dashboard / budgets)
+  viewMonth: string;
+  earliestMonth: string;
+  setViewMonth: (month: string) => void;
   // lifecycle
   resetDemo: () => void;
   clearAll: () => void;
@@ -97,6 +101,7 @@ export function StoreProvider({
   const [data, setData] = useState<FinanceData>(emptyData);
   const [ready, setReady] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [monthOverride, setMonthOverride] = useState<string | null>(null);
 
   const bootstrapped = useRef(false);
   const repoRef = useRef<Repo | null>(null);
@@ -106,6 +111,17 @@ export function StoreProvider({
   // keep the app's reference clock in sync with the active dataset (demo data
   // pins "today" to the end of its showcase month; real accounts use the real clock)
   setReferenceDate(data.referenceDate ?? null);
+
+  // month picker: derived from the live clock unless the user has navigated;
+  // the override is cleared whenever the underlying dataset changes
+  const viewMonth = monthOverride ?? currentMonthKey();
+  const earliestMonth =
+    data.transactions.length > 0
+      ? data.transactions.reduce((min, t) => (t.date < min ? t.date : min), data.transactions[0].date).slice(0, 7)
+      : currentMonthKey();
+  useEffect(() => {
+    setMonthOverride(null);
+  }, [data.referenceDate, data.seededDemo]);
 
   // ---------------------------------------------------------------- bootstrap
   useEffect(() => {
@@ -216,6 +232,9 @@ export function StoreProvider({
       isGuest,
       user,
       signOut,
+      viewMonth,
+      earliestMonth,
+      setViewMonth: (m: string) => setMonthOverride(m),
       isDemo: data.seededDemo && data.transactions.some((t) => t.isDemo),
 
       addAccount(d) {
@@ -417,7 +436,7 @@ export function StoreProvider({
       },
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, ready, mode, isGuest, user]);
+  }, [data, ready, mode, isGuest, user, viewMonth, earliestMonth]);
 
   return <StoreContext.Provider value={api}>{children}</StoreContext.Provider>;
 }

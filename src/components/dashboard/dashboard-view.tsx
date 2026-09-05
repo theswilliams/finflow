@@ -14,7 +14,7 @@ import { SpendingOverview } from "./spending-overview";
 import { CategoryBreakdown } from "./category-breakdown";
 import { BudgetProgress } from "./budget-progress";
 import { RecentTransactions } from "./recent-transactions";
-import { currentMonthKey, monthLabel } from "@/lib/finance/dates";
+import { MonthNav } from "@/components/month-nav";
 
 function DashboardSkeleton() {
   return (
@@ -78,14 +78,17 @@ export function DashboardView() {
     <div className="space-y-6">
       <PageHeader
         title="Dashboard"
-        description={`How you're doing in ${monthLabel(currentMonthKey(), { month: "long", year: "numeric" })}`}
+        description="Where your money went, and how it's tracking."
         actions={
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/transactions/import">
-              <Upload className="size-4" />
-              Import CSV
-            </Link>
-          </Button>
+          <>
+            <MonthNav />
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/transactions/import">
+                <Upload className="size-4" />
+                Import CSV
+              </Link>
+            </Button>
+          </>
         }
       />
       <NetCashflow />

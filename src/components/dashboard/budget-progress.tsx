@@ -6,16 +6,15 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Wallet } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { budgetStatus } from "@/lib/finance/calculations";
-import { currentMonthKey } from "@/lib/finance/dates";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/primitives";
 import { BudgetBar } from "@/components/budgets/budget-bar";
 import { EmptyState } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 
 export function BudgetProgress() {
-  const { data } = useStore();
+  const { data, viewMonth } = useStore();
   const router = useRouter();
-  const month = currentMonthKey();
+  const month = viewMonth;
 
   const statuses = useMemo(
     () =>

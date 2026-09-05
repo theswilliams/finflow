@@ -3,13 +3,13 @@
 import { useMemo } from "react";
 import { useStore } from "@/lib/store";
 import { summarize, pctChange } from "@/lib/finance/calculations";
-import { currentMonthKey, addMonths, monthLabel } from "@/lib/finance/dates";
+import { addMonths, monthLabel } from "@/lib/finance/dates";
 import { Card } from "@/components/ui/primitives";
 import { Money, TrendPill } from "@/components/shared";
 
 export function NetCashflow() {
-  const { data } = useStore();
-  const month = currentMonthKey();
+  const { data, viewMonth } = useStore();
+  const month = viewMonth;
 
   const { current, prev } = useMemo(() => {
     return {

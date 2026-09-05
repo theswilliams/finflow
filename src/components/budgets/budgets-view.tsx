@@ -5,7 +5,8 @@ import { Plus, Wallet, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useStore } from "@/lib/store";
 import { budgetStatus } from "@/lib/finance/calculations";
-import { currentMonthKey, monthLabel, daysInMonth, now } from "@/lib/finance/dates";
+import { currentMonthKey, daysInMonth, now } from "@/lib/finance/dates";
+import { MonthNav } from "@/components/month-nav";
 import { CATEGORIES, EXPENSE_CATEGORIES, categoryName } from "@/lib/categories";
 import { toCents } from "@/lib/finance/money";
 import type { CategoryId } from "@/lib/types";
@@ -26,8 +27,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CategoryDot } from "@/components/shared";
 
 export function BudgetsView() {
-  const { data, ready, upsertBudget, removeBudget } = useStore();
-  const month = currentMonthKey();
+  const { data, ready, viewMonth, upsertBudget, removeBudget } = useStore();
+  const month = viewMonth;
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<{ categoryId: CategoryId; limit: string } | null>(null);
 
@@ -43,8 +44,10 @@ export function BudgetsView() {
     return { budget, spent, projected, remaining: budget - spent };
   }, [statuses]);
 
+  const isCurrentMonth = month === currentMonthKey();
   const dayOfMonth = now().getDate();
   const totalDays = daysInMonth(month);
+  const progressLabel = isCurrentMonth ? `day ${dayOfMonth} of ${totalDays}` : "complete";
   const unbudgeted = EXPENSE_CATEGORIES.filter((c) => !data.budgets.some((b) => b.categoryId === c.id));
 
   const openCreate = () => {
@@ -59,7 +62,7 @@ export function BudgetsView() {
   if (ready && data.budgets.length === 0) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Budgets" description={monthLabel(month, { month: "long", year: "numeric" })} />
+        <PageHeader title="Budgets" description="Set a monthly limit for each category and track progress." actions={<MonthNav />} />
         <EmptyState
           icon={Wallet}
           title="Give your money a plan."
@@ -86,8 +89,13 @@ export function BudgetsView() {
     <div className="space-y-6">
       <PageHeader
         title="Budgets"
-        description={`${monthLabel(month, { month: "long", year: "numeric" })} · day ${dayOfMonth} of ${totalDays}`}
-        actions={<Button size="sm" onClick={openCreate}><Plus className="size-4" /> New budget</Button>}
+        description={`${progressLabel === "complete" ? "Month complete" : progressLabel}`}
+        actions={
+          <>
+            <MonthNav />
+            <Button size="sm" onClick={openCreate}><Plus className="size-4" /> New budget</Button>
+          </>
+        }
       />
 
       {/* summary */}

@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { spendByCategory } from "@/lib/finance/calculations";
-import { currentMonthKey } from "@/lib/finance/dates";
 import { categoryName } from "@/lib/categories";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/primitives";
 import { CategoryDonut } from "@/components/charts/category-donut";
@@ -13,9 +12,9 @@ import { EmptyState } from "@/components/shared";
 import { PieChart } from "lucide-react";
 
 export function CategoryBreakdown() {
-  const { data } = useStore();
+  const { data, viewMonth } = useStore();
   const router = useRouter();
-  const month = currentMonthKey();
+  const month = viewMonth;
 
   const rows = useMemo(() => spendByCategory(data.transactions, month), [data.transactions, month]);
   const total = rows.reduce((s, r) => s + r.amount, 0);
