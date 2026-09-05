@@ -69,7 +69,7 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
             <Icon className={cn("size-4 shrink-0", active ? "text-foreground" : "text-muted-foreground")} />
             <span className="flex-1">{item.label}</span>
             {item.href === "/review" && reviewCount > 0 ? (
-              <span className="tnum rounded-full bg-warning-soft px-1.5 py-0.5 text-[11px] font-semibold text-warning">
+              <span className="tnum rounded-full bg-primary px-1.5 py-0.5 text-[11px] font-semibold text-primary-foreground">
                 {reviewCount}
               </span>
             ) : null}

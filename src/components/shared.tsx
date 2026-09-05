@@ -156,7 +156,7 @@ export function EmptyState({
       <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-surface-muted text-muted-foreground">
         <Icon className="size-5" />
       </div>
-      <h3 className="text-[15px] font-semibold text-foreground">{title}</h3>
+      <h2 className="text-[15px] font-semibold text-foreground">{title}</h2>
       <p className="mt-1 max-w-sm text-[13px] text-muted-foreground">{description}</p>
       {action ? <div className="mt-5">{action}</div> : null}
     </div>
