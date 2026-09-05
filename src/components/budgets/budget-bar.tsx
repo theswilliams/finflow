@@ -41,6 +41,7 @@ export function BudgetBar({
       </div>
       <Progress
         value={status.ratio * 100}
+        label={`${categoryName(status.budget.categoryId)} budget used`}
         className="mt-2"
         indicatorClassName={meta.bar}
       />

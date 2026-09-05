@@ -55,14 +55,15 @@ export async function updateSession(request: NextRequest) {
   // A signed-in visitor doesn't need the guest cookie hanging around.
   if (user && isGuest) response.cookies.delete(GUEST_COOKIE);
 
-  // Unauthenticated + not already a guest → drop straight into the demo
-  // rather than a login wall (portfolio-friendly). /login is still reachable.
+  // Unauthenticated + not already a guest → drop straight into the demo rather
+  // than a login wall (portfolio-friendly). Set the cookie and continue on the
+  // same request — no redirect hop. /login is still reachable directly.
   if (!user && !isGuest && !isPublic) {
-    const redirect = request.nextUrl.clone();
-    redirect.pathname = "/demo";
-    redirect.search = "";
-    redirect.searchParams.set("next", pathname);
-    return NextResponse.redirect(redirect);
+    request.cookies.set(GUEST_COOKIE, "1"); // visible to this request's RSC render
+    const withGuest = NextResponse.next({ request });
+    response.cookies.getAll().forEach((c) => withGuest.cookies.set(c)); // keep refreshed auth cookies
+    withGuest.cookies.set(GUEST_COOKIE, "1", { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+    return withGuest;
   }
 
   if (user && (pathname === "/login" || pathname === "/signup")) {

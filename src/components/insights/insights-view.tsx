@@ -12,7 +12,8 @@ import { CATEGORIES, categoryName, categoryColor } from "@/lib/categories";
 import type { CategoryId } from "@/lib/types";
 import { PageHeader, EmptyState, Money, CategoryDot } from "@/components/shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/primitives";
-import { Tabs, TabsList, TabsTrigger, Progress } from "@/components/ui/controls";
+import { Progress } from "@/components/ui/controls";
+import { Segmented } from "@/components/ui/segmented";
 import { MonthlyBars, CategoryTrendLines } from "@/components/charts/trend-lines";
 import { MerchantAvatar } from "@/components/transactions/merchant-avatar";
 
@@ -72,13 +73,16 @@ export function InsightsView() {
         title="Insights"
         description="Trends, recurring costs, and where your money really goes."
         actions={
-          <Tabs value={String(range)} onValueChange={(v) => setRange(Number(v) as 3 | 6 | 12)}>
-            <TabsList>
-              <TabsTrigger value="3">3M</TabsTrigger>
-              <TabsTrigger value="6">6M</TabsTrigger>
-              <TabsTrigger value="12">12M</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <Segmented
+            ariaLabel="Time range"
+            value={String(range) as "3" | "6" | "12"}
+            onChange={(v) => setRange(Number(v) as 3 | 6 | 12)}
+            options={[
+              { value: "3", label: "3M" },
+              { value: "6", label: "6M" },
+              { value: "12", label: "12M" },
+            ]}
+          />
         }
       />
 
@@ -178,8 +182,8 @@ export function InsightsView() {
                 </div>
                 <Progress
                   value={topCategories[0] ? (c.amount / topCategories[0].amount) * 100 : 0}
+                  label={`${categoryName(c.categoryId)} share of top-category spend`}
                   className="mt-1.5"
-                  indicatorClassName=""
                 />
               </div>
             ))}

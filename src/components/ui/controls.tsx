@@ -132,14 +132,18 @@ export function Progress({
   value,
   className,
   indicatorClassName,
+  label = "Progress",
   ...props
 }: React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> & {
   value: number;
   indicatorClassName?: string;
+  /** accessible name — screen readers announce this + the percentage */
+  label?: string;
 }) {
   const clamped = Math.min(100, Math.max(0, Number.isFinite(value) ? value : 0));
   return (
     <ProgressPrimitive.Root
+      aria-label={label}
       className={cn("relative h-2 w-full overflow-hidden rounded-full bg-surface-muted", className)}
       value={clamped}
       {...props}

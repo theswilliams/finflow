@@ -10,7 +10,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </span>
         <span className="text-lg font-semibold tracking-tight text-foreground">FinFlow</span>
       </div>
-      <div className="w-full max-w-sm">{children}</div>
+      <main className="w-full max-w-sm">{children}</main>
       <SiteFooter className="mt-8" />
     </div>
   );

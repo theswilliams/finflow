@@ -5,7 +5,7 @@ import { useStore } from "@/lib/store";
 import { dailySpend } from "@/lib/finance/calculations";
 import { monthKey, now, currentMonthKey, daysInMonth } from "@/lib/finance/dates";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/primitives";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/controls";
+import { Segmented } from "@/components/ui/segmented";
 import { SpendingAreaChart, type SpendingPoint } from "@/components/charts/spending-area";
 import { Money } from "@/components/shared";
 import { formatMoney } from "@/lib/finance/money";
@@ -72,13 +72,16 @@ export function SpendingOverview() {
             )}
           </p>
         </div>
-        <Tabs value={grain} onValueChange={(v) => setGrain(v as Grain)}>
-          <TabsList>
-            <TabsTrigger value="daily">Daily</TabsTrigger>
-            <TabsTrigger value="weekly">Weekly</TabsTrigger>
-            <TabsTrigger value="monthly">Monthly</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <Segmented
+          ariaLabel="Spending time grain"
+          value={grain}
+          onChange={setGrain}
+          options={[
+            { value: "daily", label: "Daily" },
+            { value: "weekly", label: "Weekly" },
+            { value: "monthly", label: "Monthly" },
+          ]}
+        />
       </CardHeader>
       <CardContent>
         <SpendingAreaChart
