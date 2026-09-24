@@ -50,3 +50,6 @@ skills-lock.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local preview config
+.claude/launch.json
