@@ -318,12 +318,14 @@ export function createRepo(supabase: SupabaseClient, userId: string): Repo {
     },
 
     async clearAll() {
+      // Not atomic (each call is its own request). Errors are surfaced so a failed delete stops the
+      // operation instead of continuing into a half-cleared state; the store then reloads the
+      // database's true state. A fully atomic version would be a single SQL function (RPC).
       // transactions cascade from accounts, but delete explicitly to be safe
-      await supabase.from("transactions").delete().eq("user_id", userId);
-      await supabase.from("budgets").delete().eq("user_id", userId);
-      await supabase.from("goals").delete().eq("user_id", userId);
-      await supabase.from("categorization_rules").delete().eq("user_id", userId);
-      await supabase.from("accounts").delete().eq("user_id", userId);
+      for (const table of ["transactions", "budgets", "goals", "categorization_rules", "accounts"] as const) {
+        const { error } = await supabase.from(table).delete().eq("user_id", userId);
+        throwIf(error, `clear ${table}`);
+      }
       await this.markDemoSeeded(false, null);
     },
 

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { safeNextPath } from "@/lib/safeRedirect";
 
 /**
  * Exchanges the `code` from an email confirmation / password-reset / OAuth
@@ -8,7 +9,8 @@ import { createServerClient } from "@supabase/ssr";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard";
+  // `next` is user-controlled: only ever redirect to a same-origin path.
+  const next = safeNextPath(searchParams.get("next"), origin);
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

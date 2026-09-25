@@ -19,6 +19,8 @@ import { captureError } from "./observe";
 import { uid } from "./utils";
 import { createClient, isSupabaseConfigured } from "./supabase/client";
 import { createRepo, type Repo } from "./supabase/repository";
+import { createPersister } from "./persistence";
+import { parseFinanceData } from "./importSchema";
 
 export { computeImportHash };
 
@@ -197,18 +199,32 @@ export function StoreProvider({
     }
   }, [data, ready, mode]);
 
+  // Serialized write queue: keeps writes in order and, if one fails, reloads the
+  // authoritative snapshot so the UI never keeps state the database rejected.
+  const persist = useMemo(
+    () =>
+      // The repo ref is only read later, when a write runs (never during render).
+      // eslint-disable-next-line react-hooks/refs
+      createPersister<Repo>({
+        enabled: () => mode === "supabase",
+        getRepo: () => repoRef.current,
+        reconcile: async (repo) => {
+          setData(await repo.loadSnapshot());
+        },
+        onError: (e, phase) => {
+          captureError(e, { where: phase === "write" ? "store.persist" : "store.reconcile" });
+          toast.error(
+            phase === "write"
+              ? "That change couldn't be saved, so your data was reloaded from your account."
+              : "A change couldn't be saved and your data couldn't be reloaded. Please refresh the page.",
+          );
+        },
+      }),
+    [mode],
+  );
+
   const api = useMemo<StoreValue>(() => {
     const mutate = (fn: (d: FinanceData) => FinanceData) => setData((d) => fn(structuredClone(d)));
-
-    /** fire a write to Supabase (when in that mode) and surface failures */
-    const persist = (run: (repo: Repo) => Promise<unknown>) => {
-      const repo = repoRef.current;
-      if (mode !== "supabase" || !repo) return;
-      Promise.resolve(run(repo)).catch((e) => {
-        captureError(e, { where: "store.persist" });
-        toast.error("Change could not be saved. It may not persist after a refresh.");
-      });
-    };
 
     const signOut = async () => {
       // A hard navigation is intentional here: it drops every bit of client
@@ -424,7 +440,7 @@ export function StoreProvider({
         persist((r) => r.clearAll());
       },
       importJson(raw) {
-        const parsed = JSON.parse(raw) as FinanceData;
+        const parsed = parseFinanceData(raw); // validates shape, sizes and references; throws a user-safe Error
         setData(parsed);
         persist((r) => r.replaceAll(parsed));
       },
@@ -432,7 +448,7 @@ export function StoreProvider({
         return JSON.stringify(data, null, 2);
       },
     };
-  }, [data, ready, mode, isGuest, user, viewMonth, earliestMonth]);
+  }, [data, ready, mode, isGuest, user, viewMonth, earliestMonth, persist]);
 
   return <StoreContext.Provider value={api}>{children}</StoreContext.Provider>;
 }

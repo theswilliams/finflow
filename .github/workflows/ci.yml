@@ -16,8 +16,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
-      - run: npm test
       - run: npx tsc --noEmit
+      - run: npm test
+      # Production build. Uses placeholder public Supabase values (not real credentials) so the
+      # Supabase code paths compile; nothing is contacted at build time.
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key-not-a-real-key
 
   secrets:
     runs-on: ubuntu-latest

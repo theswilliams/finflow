@@ -53,12 +53,14 @@ Business logic is kept in framework-free modules so it can be unit-tested; compo
 - **CSV pipeline** (`lib/csv.ts`): header-role guessing, multiple date formats, row validation before import.
 - **Duplicate detection:** composite key of date + amount + type + merchant + account. *Known limitation:* two truly identical same-day purchases look like duplicates.
 - **Storage seam:** optimistic writes behind one store; local mode needs no backend.
-- **Database:** normalized Postgres schema with row-level security on every user table (`supabase/migrations`, 3 migrations); session handling via `@supabase/ssr`.
+- **Database:** normalized Postgres schema with row-level security on every user table plus database-enforced tenant integrity: a transaction can only reference accounts owned by the same user (composite foreign keys, `supabase/migrations`, 4 migrations); session handling via `@supabase/ssr`.
+- **Optimistic writes with reconciliation:** writes go through a serialized queue (so an account exists before its transactions are saved); if one fails, the app reports it and reloads the saved state instead of showing data the database rejected.
+- **Untrusted input:** imported JSON is schema-validated (shape, sizes, account references); the auth redirect `next` parameter is restricted to same-origin paths.
 - Error boundaries and error reporting hooks for graceful failures.
 
 ## Testing
-`npm test` runs **65 Vitest tests across 8 files** covering money, calculations, dates, filtering, insights, the categorization engine, CSV parsing and import hashing. Last run: 65 passed. GitHub Actions runs lint, tests, `tsc --noEmit` and a Gitleaks secret scan on every push and pull request.
-Not covered: UI components, end-to-end flows, and the Supabase mode against a live project (implemented and schema-reviewed, not covered by automated tests). ESLint currently reports 7 warnings and 0 errors.
+`npm test` runs **115 Vitest tests across 12 files**: money, calculations, dates, filtering, insights, the categorization engine, CSV parsing and import hashing, plus tests for the security-relevant code: **database tenant integrity** (the real SQL migrations run in an in-process Postgres, PGlite, acting as different users with RLS enforced), the serialized/reconciling write queue, JSON-import validation and safe redirects. Last run: 115 passed. GitHub Actions runs lint, `tsc --noEmit`, tests, a **production build** and a Gitleaks secret scan on every push and pull request.
+Not covered: UI components, end-to-end flows, and the Supabase client code against a live Supabase project (the SQL is tested; the JS repository layer is not). ESLint reports 0 errors and 7 advisory warnings. Known limit: "replace all data" (import/reset) is several separate requests rather than one transaction, so a mid-way failure can leave partial data.
 
 ## Tech Stack
 Next.js 16, React 19, TypeScript, Tailwind CSS v4, Radix UI primitives, Recharts, Zod + React Hook Form, PapaParse, Supabase (`@supabase/ssr`, Postgres, RLS), Vitest, GitHub Actions, Vercel.

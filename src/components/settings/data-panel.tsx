@@ -87,8 +87,8 @@ export function DataPanel() {
                 try {
                   importJson(String(reader.result));
                   toast.success("Data imported");
-                } catch {
-                  toast.error("That file could not be read");
+                } catch (e) {
+                  toast.error(e instanceof Error ? e.message : "That file could not be read");
                 }
               };
               reader.readAsText(file);
