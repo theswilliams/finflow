@@ -56,10 +56,11 @@ Business logic is kept in framework-free modules so it can be unit-tested; compo
 - **Database:** normalized Postgres schema with row-level security on every user table plus database-enforced tenant integrity: a transaction can only reference accounts owned by the same user (composite foreign keys, `supabase/migrations`, 4 migrations); session handling via `@supabase/ssr`.
 - **Optimistic writes with reconciliation:** writes go through a serialized queue (so an account exists before its transactions are saved); if one fails, the app reports it and reloads the saved state instead of showing data the database rejected.
 - **Untrusted input:** imported JSON is schema-validated (shape, sizes, account references); the auth redirect `next` parameter is restricted to same-origin paths.
+- **Baseline security headers** on every route (nosniff, no framing, strict referrer policy, unused browser features off).
 - Error boundaries and error reporting hooks for graceful failures.
 
 ## Testing
-`npm test` runs **115 Vitest tests across 12 files**: money, calculations, dates, filtering, insights, the categorization engine, CSV parsing and import hashing, plus tests for the security-relevant code: **database tenant integrity** (the real SQL migrations run in an in-process Postgres, PGlite, acting as different users with RLS enforced), the serialized/reconciling write queue, JSON-import validation and safe redirects. Last run: 115 passed. GitHub Actions runs lint, `tsc --noEmit`, tests, a **production build** and a Gitleaks secret scan on every push and pull request.
+`npm test` runs **117 Vitest tests across 13 files**: money, calculations, dates, filtering, insights, the categorization engine, CSV parsing and import hashing, plus tests for the security-relevant code: **database tenant integrity** (the real SQL migrations run in an in-process Postgres, PGlite, acting as different users with RLS enforced), the serialized/reconciling write queue, JSON-import validation and safe redirects. Last run: 117 passed. GitHub Actions runs lint, `tsc --noEmit`, tests, a **production build** and a Gitleaks secret scan on every push and pull request.
 Not covered: UI components, end-to-end flows, and the Supabase client code against a live Supabase project (the SQL is tested; the JS repository layer is not). ESLint reports 0 errors and 7 advisory warnings. Known limit: "replace all data" (import/reset) is several separate requests rather than one transaction, so a mid-way failure can leave partial data.
 
 ## Tech Stack
