@@ -1,3 +1,4 @@
+import { fetchAllRows } from "./paginate";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
   Account,
@@ -198,7 +199,16 @@ export function createRepo(supabase: SupabaseClient, userId: string): Repo {
     async loadSnapshot() {
       const [accounts, transactions, budgets, goals, rules] = await Promise.all([
         supabase.from("accounts").select("*").order("created_at"),
-        supabase.from("transactions").select("*").order("posted_on", { ascending: false }),
+        // Paged: the API silently caps a single response (1000 rows by default). The id tie-breaker gives
+        // a total order so pages never overlap or skip rows.
+        fetchAllRows((from, to) =>
+          supabase
+            .from("transactions")
+            .select("*")
+            .order("posted_on", { ascending: false })
+            .order("id", { ascending: true })
+            .range(from, to),
+        ),
         supabase.from("budgets").select("*"),
         supabase.from("goals").select("*").order("created_at"),
         supabase.from("categorization_rules").select("*").order("priority", { ascending: false }),
@@ -257,9 +267,12 @@ export function createRepo(supabase: SupabaseClient, userId: string): Repo {
 
     upsertTransactions,
     async deleteTransactions(ids) {
-      if (!ids.length) return;
-      const { error } = await supabase.from("transactions").delete().in("id", ids);
-      throwIf(error, "delete transactions");
+      // Chunked: every id goes into the request URL, so thousands of UUIDs in one `.in()` would exceed
+      // typical URL length limits (a bulk "select all, delete" would fail).
+      for (const part of chunk(ids, 100)) {
+        const { error } = await supabase.from("transactions").delete().in("id", part);
+        throwIf(error, "delete transactions");
+      }
     },
 
     async upsertBudget(b) {
