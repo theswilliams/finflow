@@ -21,7 +21,7 @@ All screenshots use generated sample data.
 FinFlow imports transactions (manually or from a bank's CSV export), categorizes them automatically, and shows where money went: monthly cash flow, spending by category, budget progress, recurring charges, unusual spending and savings goals. Money is handled in integer cents throughout, and transfers between accounts are excluded from spending.
 
 ## Why I Built It
-*[Edit in your own words. Suggested:]* I wanted a project where correctness matters more than screens: money math, rules that must not override a user's manual choices, messy CSV input and data that must stay private per user. It let me practice domain modelling, testing pure business logic, and designing one persistence layer that works in several modes.
+I wanted a project where correctness matters more than screens: money math, rules that must not override a user's manual choices, messy CSV input and data that must stay private per user. It let me practice domain modelling, testing pure business logic, and designing one persistence layer that works in several modes.
 
 ## Key Features
 - **Dashboard:** monthly net cash flow, income/expenses with month-over-month change, account balances, running-total spending chart, category breakdown, budget progress.
