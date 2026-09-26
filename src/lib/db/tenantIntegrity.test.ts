@@ -24,8 +24,9 @@ const AUTH_STUB = `
   create function auth.uid() returns uuid language sql stable as $$
     select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
   $$;
+  create role anon nologin;
   create role authenticated nologin;
-  grant usage on schema public to authenticated;
+  grant usage on schema public to anon, authenticated;
 `;
 
 async function createDb(upToPrefix?: string) {
@@ -228,5 +229,61 @@ describe("migration 0004 safety guard", () => {
     } finally {
       await db.close();
     }
+  });
+});
+
+describe("function hardening (migration 0005)", () => {
+  let db: PGlite;
+  beforeAll(async () => {
+    db = await createDb();
+    await db.exec(`
+      create role auth_admin nologin;
+      grant usage on schema auth to auth_admin;
+      grant select, insert on auth.users to auth_admin;
+    `);
+  });
+  afterAll(async () => db.close());
+
+  const canExecute = async (role: string) => {
+    const r = await db.query<{ ok: boolean }>(
+      "select has_function_privilege($1, 'public.handle_new_user()', 'execute') as ok",
+      [role],
+    );
+    return r.rows[0].ok;
+  };
+
+  it("signed-out and signed-in users cannot execute the signup trigger function", async () => {
+    expect(await canExecute("anon")).toBe(false);
+    expect(await canExecute("authenticated")).toBe(false);
+  });
+
+  it("sign-up still works: a non-superuser inserting into auth.users fires the trigger", async () => {
+    await db.exec("reset role");
+    await db.exec("set role auth_admin");
+    const r = await db.query<{ id: string }>("insert into auth.users (email) values ('new@example.com') returning id");
+    await db.exec("reset role");
+    const id = r.rows[0].id;
+    const profile = await db.query("select 1 from profiles where id = $1", [id]);
+    const rules = await db.query("select 1 from categorization_rules where user_id = $1", [id]);
+    expect(profile.rows).toHaveLength(1);
+    expect(rules.rows).toHaveLength(3);
+  });
+
+  it("set_updated_at has a fixed search_path and still stamps updated_at", async () => {
+    const cfg = await db.query<{ proconfig: string[] | null }>(
+      "select proconfig from pg_proc where oid = 'public.set_updated_at'::regproc",
+    );
+    expect(cfg.rows[0].proconfig?.some((c) => c.startsWith("search_path="))).toBe(true);
+
+    const u = await addUser(db, "stamp@example.com");
+    const acct = await addAccount(db, u, "Stamp");
+    await db.exec("reset role");
+    await db.exec("update accounts set updated_at = '2000-01-01' where id = '" + acct + "'");
+    await db.exec("update accounts set name = 'Renamed' where id = '" + acct + "'");
+    const r = await db.query<{ recent: boolean }>(
+      "select updated_at > now() - interval '1 minute' as recent from accounts where id = $1",
+      [acct],
+    );
+    expect(r.rows[0].recent).toBe(true);
   });
 });

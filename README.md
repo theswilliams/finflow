@@ -53,7 +53,7 @@ Business logic is kept in framework-free modules so it can be unit-tested; compo
 - **CSV pipeline** (`lib/csv.ts`): header-role guessing, multiple date formats, row validation before import.
 - **Duplicate detection:** composite key of date + amount + type + merchant + account. *Known limitation:* two truly identical same-day purchases look like duplicates.
 - **Storage seam:** optimistic writes behind one store; local mode needs no backend.
-- **Database:** normalized Postgres schema with row-level security on every user table plus database-enforced tenant integrity: a transaction can only reference accounts owned by the same user (composite foreign keys, `supabase/migrations`, 4 migrations); session handling via `@supabase/ssr`.
+- **Database:** normalized Postgres schema with row-level security on every user table plus database-enforced tenant integrity: a transaction can only reference accounts owned by the same user (composite foreign keys, `supabase/migrations`, 5 migrations); session handling via `@supabase/ssr`.
 - **Optimistic writes with reconciliation:** writes go through a serialized queue (so an account exists before its transactions are saved); if one fails, the app reports it and reloads the saved state instead of showing data the database rejected.
 - **Large ledgers:** the transaction load is paged (the Supabase API silently caps one response at 1,000 rows), and bulk deletes are chunked so request URLs stay short; both are covered by tests against a fake client.
 - **Untrusted input:** imported JSON is schema-validated (shape, sizes, account references); the auth redirect `next` parameter is restricted to same-origin paths.
@@ -61,7 +61,7 @@ Business logic is kept in framework-free modules so it can be unit-tested; compo
 - Error boundaries and error reporting hooks for graceful failures.
 
 ## Testing
-`npm test` runs **128 Vitest tests across 15 files**: money, calculations, dates, filtering, insights, the categorization engine, CSV parsing and import hashing, plus tests for the security-relevant code: **database tenant integrity** (the real SQL migrations run in an in-process Postgres, PGlite, acting as different users with RLS enforced), the serialized/reconciling write queue, JSON-import validation and safe redirects. Last run: 128 passed. GitHub Actions runs lint, `tsc --noEmit`, tests, a **production build** and a Gitleaks secret scan on every push and pull request.
+`npm test` runs **131 Vitest tests across 15 files**: money, calculations, dates, filtering, insights, the categorization engine, CSV parsing and import hashing, plus tests for the security-relevant code: **database tenant integrity** (the real SQL migrations run in an in-process Postgres, PGlite, acting as different users with RLS enforced), the serialized/reconciling write queue, JSON-import validation and safe redirects. Last run: 131 passed. GitHub Actions runs lint, `tsc --noEmit`, tests, a **production build** and a Gitleaks secret scan on every push and pull request.
 Not covered: UI components, end-to-end flows, and the Supabase client code against a live Supabase project (the SQL is tested, and the repository's paging/chunking is tested against a fake client). ESLint reports 0 errors and 7 advisory warnings. Known limit: "replace all data" (import/reset) is several separate requests rather than one transaction, so a mid-way failure can leave partial data.
 
 ## Tech Stack
